@@ -277,7 +277,7 @@ nav.bottom button.on{color:var(--brand)}
     <!-- PROFIL -->
     <section class="view" id="v-profile">
       <div class="row" style="margin-top:6px">
-        <div class="avatar" id="avatar">M</div>
+        <div class="avatar" id="avatar">J</div>
         <div class="grow"><h1 style="font-size:24px;margin:0" id="profileName"></h1><p class="sub">Kundennr. 104 772</p></div>
       </div>
       <h2>Persönliche Daten</h2>
@@ -340,7 +340,7 @@ const curStore=()=>STORES[S.store]||STORES.perg;
 
 /* ===================== Beispieldaten ===================== */
 const DEFAULT = {
-  profile:{first:'Maria',last:'Berger',mail:'maria.berger@example.at',phone:'+43 660 123 4567',addr:'Musterweg 3, 4320 Perg'},
+  profile:{first:'Julian',last:'Karlinger',mail:'julian.karlinger@example.at',phone:'+43 660 123 4567',addr:'Musterweg 3, 4320 Perg'},
   store:null,
   notif:{reminder:true,appt:true,offers:false,repair:true},
   glasses:[
@@ -358,9 +358,9 @@ const DEFAULT = {
 function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
 let S;
-try{S=JSON.parse(localStorage.getItem('falkner'))}catch(e){}
+try{S=JSON.parse(localStorage.getItem('falkner-v5'))}catch(e){}
 if(!S) S=JSON.parse(JSON.stringify(DEFAULT));
-function persist(){try{localStorage.setItem('falkner',JSON.stringify(S))}catch(e){}}
+function persist(){try{localStorage.setItem('falkner-v5',JSON.stringify(S))}catch(e){}}
 
 const fmtDate=(iso,opt={day:'2-digit',month:'2-digit',year:'numeric'})=>new Date(iso+'T12:00').toLocaleDateString('de-AT',opt);
 const eur=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
