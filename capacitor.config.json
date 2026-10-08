@@ -1,0 +1,8 @@
+{
+  "appId": "at.optikfalkner.kundenapp",
+  "appName": "Optik Falkner",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#f3f2f0"
+  }
+}

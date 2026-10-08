@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#26262b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Optik Falkner">
+<title>Optik Falkner – Kunden-App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f2f0; --surface:#ffffff; --surface-2:#f8f7f5; --ink:#1c1c1f; --muted:#6e6e74;
+  --line:#e4e2de; --brand:#26262b; --brand-2:#4a4a52; --accent:#c4161c; --accent-soft:#fbe5e5;
+  --ok:#2f8f6b; --ok-soft:#e1f2ea; --warn:#c9822b; --warn-soft:#fbf0de; --danger:#c2493d;
+  --radius:18px; --shadow:0 1px 2px rgba(20,35,43,.05),0 8px 24px rgba(20,35,43,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121214; --surface:#1c1c20; --surface-2:#232328; --ink:#f0f0f2; --muted:#9a9aa2;
+    --line:#2e2e34; --brand:#e8e8ec; --brand-2:#c8c8d0; --accent:#ef4a50; --accent-soft:#3a1c1e;
+    --ok:#5cc79c; --ok-soft:#173329; --warn:#e3a85a; --warn-soft:#352a18; --danger:#e57367;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+
+/* App shell – auf dem Desktop als Handy-Rahmen */
+.app{max-width:440px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative}
+@media (min-width:600px){
+  body{padding:24px 0;background:linear-gradient(135deg,#e6e4e1,#f2e6e4)}
+  .app{height:calc(100vh - 48px);min-height:0;border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(15,61,76,.25);border:8px solid #14232b}
+}
+@media (min-width:600px) and (prefers-color-scheme: dark){ body{background:#060b0d} }
+
+header.top{padding:calc(env(safe-area-inset-top) + 18px) 20px 14px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;border-radius:50%;background:var(--brand);display:grid;place-items:center}
+.logo-mark svg{width:20px;height:20px;stroke:var(--bg)}
+.logo-text{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:.2px}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);position:relative}
+.icon-btn svg{width:20px;height:20px}
+.dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+
+main{flex:1;overflow-y:auto;padding:4px 20px 110px}
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h1{font-family:'DM Serif Display',serif;font-weight:400;font-size:30px;line-height:1.1;margin:6px 0 4px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:26px 0 10px}
+h3{font-size:17px;font-weight:600}
+.sub{color:var(--muted)}
+
+.card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.card + .card{margin-top:12px}
+
+/* Hero */
+.hero{background:#26262b;color:#fff;border-radius:24px;padding:20px;position:relative;overflow:hidden;margin-top:14px}
+.hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+@media (prefers-color-scheme: dark){.hero{background:#2a2a30}}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;border:22px solid rgba(255,255,255,.07)}
+.hero .label{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.08em}
+.hero .big{font-family:'DM Serif Display',serif;font-size:24px;margin:4px 0 2px}
+.hero .meta{opacity:.85;font-size:14px}
+.hero .btn-light{margin-top:14px;background:rgba(255,255,255,.15);color:#fff;padding:9px 14px;border-radius:12px;font-weight:600;font-size:14px}
+
+/* Quick actions */
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.qa{background:var(--surface);border-radius:var(--radius);padding:16px 10px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:13px;font-weight:600}
+.qa .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center}
+.qa .ic svg{width:22px;height:22px}
+.ic-a{background:var(--accent-soft);color:var(--accent)}
+.ic-b{background:var(--ok-soft);color:var(--ok)}
+.ic-c{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand)}
+
+.row{display:flex;align-items:center;gap:12px}
+.row .grow{flex:1;min-width:0}
+.list-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:none;padding-bottom:0}
+.list-item:first-child{padding-top:0}
+.chev{color:var(--muted)}
+
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.info{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand)}
+
+/* Segmented */
+.seg{display:flex;background:var(--surface);border-radius:14px;padding:4px;box-shadow:var(--shadow);margin-top:14px}
+.seg button{flex:1;padding:10px;border-radius:10px;font-weight:600;color:var(--muted);font-size:14px}
+.seg button.on{background:var(--brand);color:var(--bg)}
+
+/* Rezepttabelle */
+.rx{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
+.rx th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:center;padding:6px 2px}
+.rx td{text-align:center;padding:10px 2px;font-weight:600;border-top:1px solid var(--line)}
+.rx td:first-child,.rx th:first-child{text-align:left}
+.eye{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--surface-2);font-size:12px;font-weight:700}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:14px}
+.kv div span{display:block;font-size:12px;color:var(--muted)}
+.kv div b{font-weight:600}
+
+.progress{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:14px;font-weight:600;background:var(--brand);color:var(--bg)}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.accent{background:var(--accent);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+
+/* Formulare */
+label.f{display:block;font-size:13px;font-weight:600;margin:16px 0 6px}
+.input,select.input,textarea.input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);outline:none}
+.input:focus{border-color:var(--brand-2)}
+textarea.input{min-height:90px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);font-size:14px;font-weight:500}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--bg)}
+.toggle{width:46px;height:28px;border-radius:99px;background:var(--line);position:relative;flex-shrink:0;transition:.2s}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--ok)}
+.toggle.on::after{left:21px}
+.upload{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;color:var(--muted);display:block;cursor:pointer}
+.thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:38px;height:38px;border-radius:12px;background:var(--surface-2);font-size:20px;font-weight:600}
+.stepper b{min-width:24px;text-align:center;font-size:18px}
+
+/* Kalender */
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 58px;padding:10px 0;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);text-align:center}
+.day small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase}
+.day b{font-size:18px}
+.day.on{background:var(--brand);border-color:var(--brand);color:var(--bg)}
+.day.on small{color:var(--bg);opacity:.8}
+.day:disabled{opacity:.35}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slot{padding:10px 0;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-weight:600;font-size:14px}
+.slot.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.slot:disabled{opacity:.3;text-decoration:line-through}
+
+/* Filial-Pill */
+.store-pill{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:13px;font-weight:600}
+.store-pill .sdot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.store-pill svg{width:14px;height:14px;color:var(--muted)}
+.store-opt{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:16px;border-radius:16px;border:2px solid var(--line);background:var(--surface-2);margin-top:10px}
+.store-opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center}
+.store-opt.on .radio{border-color:var(--accent)}
+.store-opt.on .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.mapframe{width:calc(100% + 36px);height:170px;border:0;margin:-18px -18px 16px;border-radius:var(--radius) var(--radius) 0 0;display:block;filter:grayscale(.3)}
+.open-state{font-size:13px;font-weight:600}
+.open-state.o{color:var(--ok)} .open-state.c{color:var(--danger)}
+.hours small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.right{text-align:right}
+
+/* Bottom nav */
+nav.bottom{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:8px 6px calc(env(safe-area-inset-bottom) + 8px)}
+nav.bottom button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted)}
+nav.bottom button svg{width:23px;height:23px}
+nav.bottom button.on{color:var(--brand)}
+@media (max-width:599px){nav.bottom{position:fixed;max-width:440px;margin:0 auto}}
+
+/* Bottom sheet */
+.scrim{position:absolute;inset:0;background:rgba(10,20,25,.45);opacity:0;pointer-events:none;transition:.25s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--surface);border-radius:26px 26px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:21;display:flex;flex-direction:column}
+.sheet.on{transform:none}
+@media (max-width:599px){.scrim,.sheet{position:fixed;max-width:440px;margin:0 auto}}
+.sheet-head{padding:12px 20px 8px;display:flex;align-items:center;justify-content:space-between}
+.grip{width:40px;height:5px;border-radius:99px;background:var(--line);margin:8px auto 0}
+.sheet-body{padding:0 20px calc(env(safe-area-inset-bottom) + 24px);overflow-y:auto}
+.success{text-align:center;padding:20px 0 6px}
+.success .big-ic{width:72px;height:72px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;margin:0 auto 14px}
+.success .big-ic svg{width:36px;height:36px}
+
+.toast{position:absolute;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:500;font-size:14px;opacity:0;transition:.25s;z-index:30;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:599px){.toast{position:fixed}}
+
+.map{height:150px;border-radius:14px;margin:-18px -18px 16px;background:
+  linear-gradient(90deg,transparent 48%,var(--line) 48% 52%,transparent 52%),
+  linear-gradient(0deg,transparent 38%,var(--line) 38% 42%,transparent 42%),
+  linear-gradient(30deg,transparent 70%,var(--line) 70% 72%,transparent 72%),
+  var(--surface-2);position:relative;border-radius:var(--radius) var(--radius) 0 0}
+.map .pin{position:absolute;left:50%;top:40%;transform:translate(-50%,-100%);width:34px;height:34px;border-radius:50% 50% 50% 0;background:var(--accent);rotate:-45deg;box-shadow:var(--shadow)}
+.hours{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px;margin-top:6px}
+.hours .today{font-weight:700;color:var(--brand)}
+.avatar{width:58px;height:58px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:'DM Serif Display',serif;font-size:24px}
+.muted-s{font-size:13px;color:var(--muted)}
+.mt{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="top">
+    <div class="logo">
+      <div class="logo-mark" style="background:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="stroke:#fff"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div><div class="logo-text" style="line-height:1">Falkner</div><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Sehzentrum</div></div>
+    </div>
+    <div class="row" style="gap:8px">
+    <button class="store-pill" onclick="openSheet('store')" aria-label="Filiale wählen"><span class="sdot"></span><span id="pillName">Perg</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button class="icon-btn" aria-label="Mitteilungen" onclick="toast('Keine neuen Mitteilungen')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg>
+      <span class="dot"></span>
+    </button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- START -->
+    <section class="view active" id="v-home">
+      <p class="sub" id="greet">Guten Abend</p>
+      <h1 id="greetName">Hallo!</h1>
+
+      <div class="hero" id="heroCard"></div>
+
+      <h2>Schnellzugriff</h2>
+      <div class="quick">
+        <button class="qa" onclick="openSheet('damage')"><span class="ic ic-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>Schaden melden</button>
+        <button class="qa" onclick="openSheet('order')"><span class="ic ic-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span>Linsen bestellen</button>
+        <button class="qa" onclick="openSheet('book')"><span class="ic ic-c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Termin buchen</button>
+      </div>
+
+      <h2>Kontaktlinsen-Vorrat</h2>
+      <div class="card" id="supplyCard"></div>
+
+      <h2>Aktuelles</h2>
+      <div class="card" id="activity"></div>
+    </section>
+
+    <!-- PÄSSE -->
+    <section class="view" id="v-pass">
+      <h1>Meine Pässe</h1>
+      <p class="sub">Ihre aktuellen Messwerte, digital immer dabei.</p>
+      <div class="seg">
+        <button class="on" data-seg="glasses" onclick="setSeg('glasses')">Brillenpass</button>
+        <button data-seg="lenses" onclick="setSeg('lenses')">Kontaktlinsenpass</button>
+      </div>
+      <div id="passContent" class="mt"></div>
+    </section>
+
+    <!-- TERMINE -->
+    <section class="view" id="v-appt">
+      <h1>Termine</h1>
+      <p class="sub">Buchen und verwalten Sie Ihre Besuche.</p>
+      <button class="btn mt" style="margin-top:18px" onclick="openSheet('book')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Neuen Termin buchen
+      </button>
+      <h2>Bevorstehend</h2>
+      <div id="apptList"></div>
+      <h2>Meine Meldungen &amp; Bestellungen</h2>
+      <div id="ticketList"></div>
+    </section>
+
+    <!-- FILIALE -->
+    <section class="view" id="v-store">
+      <h1>Meine Filiale</h1>
+      <p class="sub">Wählen Sie Ihre Stammfiliale.</p>
+      <div class="seg" id="storeSeg"></div>
+      <div id="storeView"></div>
+    </section>
+
+    <!-- PROFIL -->
+    <section class="view" id="v-profile">
+      <div class="row" style="margin-top:6px">
+        <div class="avatar" id="avatar">J</div>
+        <div class="grow"><h1 style="font-size:24px;margin:0" id="profileName"></h1><p class="sub">Kundennr. 104 772</p></div>
+      </div>
+      <h2>Persönliche Daten</h2>
+      <div class="card">
+        <label class="f" style="margin-top:0">Vorname</label><input class="input" id="pFirst">
+        <label class="f">Nachname</label><input class="input" id="pLast">
+        <label class="f">E-Mail</label><input class="input" type="email" id="pMail">
+        <label class="f">Telefon</label><input class="input" type="tel" id="pPhone">
+        <label class="f">Lieferadresse</label><input class="input" id="pAddr">
+        <button class="btn mt" style="margin-top:16px" onclick="saveProfile()">Speichern</button>
+      </div>
+      <h2>Stammfiliale</h2>
+      <div class="card"><div class="row"><div class="grow"><b id="profStore"></b><div class="muted-s" id="profStoreAddr"></div></div><button class="btn ghost" style="width:auto;padding:10px 14px" onclick="openSheet('store')">Ändern</button></div></div>
+      <h2>Benachrichtigungen</h2>
+      <div class="card" id="notifCard"></div>
+      <h2>Datenschutz</h2>
+      <div class="card">
+        <div class="list-item"><div class="grow">Datenschutzerklärung</div><span class="chev">›</span></div>
+        <div class="list-item"><div class="grow">Meine Daten exportieren</div><span class="chev">›</span></div>
+        <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
+      </div>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.2 · Kundendaten sind Beispieldaten</p>
+    </section>
+  </main>
+
+  <nav class="bottom">
+    <button class="on" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>Start</button>
+    <button data-view="pass" onclick="go('pass')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6.5" cy="14" r="4"/><circle cx="17.5" cy="14" r="4"/><path d="M10.5 14h3M2.5 14 4 8M21.5 14 20 8"/></svg>Pässe</button>
+    <button data-view="appt" onclick="go('appt')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Termine</button>
+    <button data-view="store" onclick="go('store')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>Filiale</button>
+    <button data-view="profile" onclick="go('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
+  </nav>
+
+  <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+    <div class="grip"></div>
+    <div class="sheet-head"><h3 id="sheetTitle"></h3><button class="icon-btn" style="box-shadow:none;background:var(--surface-2)" onclick="closeSheet()" aria-label="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ===================== Filialen (Quelle: optik-falkner.at/kontakt) ===================== */
+// hours: je Wochentag (0=Mo … 6=So) Liste von [von, bis, nurMitTermin]
+const STORES={
+  perg:{id:'perg',name:'Perg',full:'Sehzentrum Falkner Perg',street:'Herrenstraße 4',zip:'4320 Perg',
+    tel:'07262 53309',telLink:'+43726253309',mail:'office@optik-falkner.at',
+    hours:[[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00']],[]],
+    note:'',
+    services:['Augenkontrolle','3D-Sehstärkenmessung','Augenmuskelkontrolle','Augendruckmessung','Gleitsicht','Kontaktlinsenanpassung','Nachtlinsen (Ortho-K)','Myopie-Management','Hauseigene Werkstatt','Brillen-Kaskoversicherung']},
+  dimbach:{id:'dimbach',name:'Dimbach',full:'Optik Falkner Dimbach',street:'Dimbach 16',zip:'4371 Dimbach',
+    tel:'07262 533095',telLink:'+437262533095',mail:'dimbach@optik-falkner.at',
+    hours:[[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00']],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['09:00','12:00',1]],[]],
+    note:'17–18 Uhr und Samstag nur nach Terminvereinbarung',
+    services:['Augenkontrolle','Brillenberatung','Kontaktlinsen','Reparaturservice']}
+};
+const DAYN=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+const curStore=()=>STORES[S.store]||STORES.perg;
+
+/* ===================== Beispieldaten ===================== */
+const DEFAULT = {
+  profile:{first:'Julian',last:'Karlinger',mail:'julian.karlinger@example.at',phone:'+43 660 123 4567',addr:'Musterweg 3, 4320 Perg'},
+  store:null,
+  notif:{reminder:true,appt:true,offers:false,repair:true},
+  glasses:[
+    {id:'g1',name:'Gleitsichtbrille',frame:'ProDesign Denmark',date:'2026-03-14',lens:'Essilor Varilux 1.6, entspiegelt',
+     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'+1,50'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'+1,50'},pd:'31,5 / 32,0'},
+    {id:'g2',name:'Optische Sonnenbrille',frame:'Etnia Barcelona',date:'2025-05-22',lens:'Nikon polarisiert, Grau 85 %',
+     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'–'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'–'},pd:'31,5 / 32,0'}
+  ],
+  lenses:{product:'Acuvue Oasys 1-Day',maker:'Johnson & Johnson',type:'Tageslinse',date:'2026-02-03',
+    R:{bc:'8,5',dia:'14,3',sph:'-2,00'},L:{bc:'8,5',dia:'14,3',sph:'-2,25'},
+    pack:'90er Box',price:64.90,stockDays:23,totalDays:90},
+  appts:[{id:'a1',type:'Kontaktlinsen-Kontrolle',date:addDays(9),time:'10:30',store:'perg'}],
+  tickets:[{id:'t1',kind:'Reparatur',title:'Nasenpad ersetzt – Gleitsichtbrille',status:'Abgeschlossen',date:'2026-08-30'}]
+};
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+
+let S;
+try{S=JSON.parse(localStorage.getItem('falkner-v5'))}catch(e){}
+if(!S) S=JSON.parse(JSON.stringify(DEFAULT));
+function persist(){try{localStorage.setItem('falkner-v5',JSON.stringify(S))}catch(e){}}
+
+const fmtDate=(iso,opt={day:'2-digit',month:'2-digit',year:'numeric'})=>new Date(iso+'T12:00').toLocaleDateString('de-AT',opt);
+const eur=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ===================== Navigation ===================== */
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));
+  document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  document.getElementById('main').scrollTop=0;
+  render();
+}
+let seg='glasses';
+function setSeg(s){seg=s;document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.seg===s));renderPass()}
+
+/* ===================== Render ===================== */
+function render(){document.getElementById('pillName').textContent=curStore().name;renderHome();renderPass();renderAppts();renderStore();renderProfile()}
+
+function renderHome(){
+  const h=new Date().getHours();
+  document.getElementById('greet').textContent=h<11?'Guten Morgen':h<18?'Guten Tag':'Guten Abend';
+  document.getElementById('greetName').textContent='Hallo, '+S.profile.first+'!';
+  const next=[...S.appts].sort((a,b)=>a.date.localeCompare(b.date))[0];
+  document.getElementById('heroCard').innerHTML = next
+    ? `<div class="label">Nächster Termin</div><div class="big">${fmtDate(next.date,{weekday:'long',day:'numeric',month:'long'})}</div>
+       <div class="meta">${next.time} Uhr · ${esc(next.type)} · ${esc((STORES[next.store]||curStore()).name)}</div><button class="btn-light" onclick="go('appt')">Details ansehen</button>`
+    : `<div class="label">Kein Termin geplant</div><div class="big">Zeit für einen Sehtest?</div>
+       <div class="meta">Wir empfehlen eine Kontrolle alle 12 Monate.</div><button class="btn-light" onclick="openSheet('book')">Jetzt buchen</button>`;
+  const L=S.lenses, pct=Math.round(L.stockDays/L.totalDays*100), low=L.stockDays<=30;
+  document.getElementById('supplyCard').innerHTML=`
+    <div class="row"><div class="grow"><h3>${esc(L.product)}</h3><div class="muted-s">Noch ca. ${L.stockDays} Tage</div></div>
+    <span class="badge ${low?'warn':'ok'}">${low?'Bald leer':'Ausreichend'}</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    ${low?`<button class="btn accent mt" style="margin-top:14px" onclick="openSheet('order')">Jetzt nachbestellen</button>`:''}`;
+  const items=S.tickets.slice(0,3).map(t=>`<div class="list-item"><div class="grow"><b>${esc(t.title)}</b><div class="muted-s">${esc(t.kind)} · ${fmtDate(t.date)}</div></div><span class="badge ${t.status==='Abgeschlossen'?'ok':'info'}">${esc(t.status)}</span></div>`).join('');
+  document.getElementById('activity').innerHTML=items||'<p class="sub">Keine Aktivitäten</p>';
+}
+
+function rxTable(R,L,cols){
+  const head=cols.map(c=>`<th>${c[0]}</th>`).join('');
+  const row=(e,o)=>`<tr><td><span class="eye">${e}</span></td>${cols.map(c=>`<td>${o[c[1]]}</td>`).join('')}</tr>`;
+  return `<table class="rx"><tr><th></th>${head}</tr>${row('R',R)}${row('L',L)}</table>`;
+}
+function renderPass(){
+  const el=document.getElementById('passContent');
+  if(seg==='glasses'){
+    el.innerHTML=S.glasses.map(g=>`
+      <div class="card">
+        <div class="row"><div class="grow"><h3>${esc(g.name)}</h3><div class="muted-s">${esc(g.frame)}</div></div><span class="badge info">${fmtDate(g.date,{month:'short',year:'numeric'})}</span></div>
+        ${rxTable(g.R,g.L,[['Sph','sph'],['Zyl','cyl'],['Achse','ax'],['Add','add']])}
+        <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div><div><span>Gemessen am</span><b>${fmtDate(g.date)}</b></div>
+        <div style="grid-column:1/-1"><span>Gläser</span><b>${esc(g.lens)}</b></div></div>
+        <div class="btn-row"><button class="btn ghost" onclick="openSheet('damage','${g.id}')">Schaden melden</button><button class="btn ghost" onclick="sharePass('${g.id}')">Teilen</button></div>
+      </div>`).join('');
+  } else {
+    const L=S.lenses;
+    el.innerHTML=`<div class="card">
+      <div class="row"><div class="grow"><h3>${esc(L.product)}</h3><div class="muted-s">${esc(L.maker)} · ${esc(L.type)}</div></div><span class="badge ok">Aktiv</span></div>
+      ${rxTable(L.R,L.L,[['BC','bc'],['DIA','dia'],['Sph','sph']])}
+      <div class="kv"><div><span>Austausch</span><b>Täglich</b></div><div><span>Packung</span><b>${esc(L.pack)}</b></div>
+      <div><span>Angepasst am</span><b>${fmtDate(L.date)}</b></div><div><span>Nächste Kontrolle</span><b>${fmtDate('2027-02-03')}</b></div></div>
+      <button class="btn accent mt" style="margin-top:16px" onclick="openSheet('order')">Kontaktlinsen nachbestellen</button></div>
+      <div class="card"><div class="row"><div class="grow"><b>Tragezeit-Erinnerung</b><div class="muted-s">Hinweis 14 Tage vor Ende des Vorrats</div></div>
+      <button class="toggle ${S.notif.reminder?'on':''}" onclick="toggleNotif('reminder')" aria-label="Erinnerung"></button></div></div>`;
+  }
+}
+
+function renderAppts(){
+  const a=[...S.appts].sort((x,y)=>x.date.localeCompare(y.date));
+  document.getElementById('apptList').innerHTML=a.length?a.map(x=>`
+    <div class="card"><div class="row">
+      <div style="text-align:center;min-width:52px"><div class="muted-s" style="text-transform:uppercase">${fmtDate(x.date,{month:'short'})}</div><div style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1">${fmtDate(x.date,{day:'numeric'})}</div></div>
+      <div class="grow"><b>${esc(x.type)}</b><div class="muted-s">${fmtDate(x.date,{weekday:'long'})}, ${x.time} Uhr · Filiale ${esc((STORES[x.store]||curStore()).name)}</div></div></div>
+      <div class="btn-row"><button class="btn ghost" onclick="cancelAppt('${x.id}')">Stornieren</button><button class="btn ghost" onclick="toast('Zum Kalender hinzugefügt')">In Kalender</button></div>
+    </div>`).join(''):'<div class="card"><p class="sub">Keine bevorstehenden Termine.</p></div>';
+  document.getElementById('ticketList').innerHTML='<div class="card">'+(S.tickets.length?S.tickets.map(t=>`
+    <div class="list-item"><div class="grow"><b>${esc(t.title)}</b><div class="muted-s">${esc(t.kind)} · ${fmtDate(t.date)}</div></div><span class="badge ${t.status==='Abgeschlossen'?'ok':'info'}">${esc(t.status)}</span></div>`).join(''):'<p class="sub">Noch keine Einträge.</p>')+'</div>';
+}
+
+function openStatus(st){
+  const now=new Date(),d=(now.getDay()+6)%7,hm=now.toTimeString().slice(0,5);
+  const r=st.hours[d].find(x=>!x[2]&&hm>=x[0]&&hm<x[1]);
+  return r?{o:true,t:'Jetzt geöffnet · bis '+r[1]+' Uhr'}:{o:false,t:'Derzeit geschlossen'};
+}
+function renderStore(){
+  const st=curStore(), today=(new Date().getDay()+6)%7, os=openStatus(st);
+  document.getElementById('storeSeg').innerHTML=Object.values(STORES).map(x=>`<button class="${x.id===st.id?'on':''}" onclick="setStore('${x.id}',true)">${x.name}</button>`).join('');
+  const q=encodeURIComponent(st.street+', '+st.zip);
+  document.getElementById('storeView').innerHTML=`
+    <div class="card mt" style="padding-top:18px">
+      <iframe class="mapframe" loading="lazy" title="Karte" src="https://maps.google.com/maps?q=${q}&z=15&output=embed"></iframe>
+      <h3>${esc(st.full)}</h3>
+      <p class="sub">${esc(st.street)}, ${esc(st.zip)}</p>
+      <p class="open-state ${os.o?'o':'c'} mt">${os.t}</p>
+      <div class="btn-row">
+        <a class="btn ghost" href="tel:${st.telLink}" style="text-decoration:none">Anrufen</a>
+        <a class="btn ghost" href="https://maps.google.com/?q=${q}" target="_blank" rel="noopener" style="text-decoration:none">Route</a>
+        <a class="btn ghost" href="mailto:${st.mail}" style="text-decoration:none">E-Mail</a>
+      </div>
+      <button class="btn accent" style="margin-top:10px" onclick="openSheet('book')">Termin in ${esc(st.name)} buchen</button>
+    </div>
+    <h2>Öffnungszeiten</h2>
+    <div class="card"><div class="hours">${st.hours.map((h,i)=>`
+      <span class="${i===today?'today':''}">${DAYN[i]}</span>
+      <span class="right ${i===today?'today':''}">${h.length?h.map(x=>x[0]+' – '+x[1]+(x[2]?'<small>nur mit Termin</small>':'')).join('<br>'):'geschlossen'}</span>`).join('')}
+    </div>${st.note?`<p class="muted-s mt">${esc(st.note)}</p>`:''}</div>
+    <h2>Kontakt</h2>
+    <div class="card">
+      <div class="list-item"><div class="grow"><span class="muted-s">Telefon</span><br><b>${st.tel}</b></div></div>
+      <div class="list-item"><div class="grow"><span class="muted-s">E-Mail</span><br><b>${st.mail}</b></div></div>
+    </div>
+    <h2>Leistungen</h2>
+    <div class="card"><div class="chips">${st.services.map(x=>`<span class="chip">${x}</span>`).join('')}</div></div>`;
+}
+function setStore(id,silent){S.store=id;persist();render();if(!silent)closeSheet();toast('Filiale '+STORES[id].name+' ausgewählt')}
+
+function renderProfile(){
+  const p=S.profile;
+  document.getElementById('profileName').textContent=p.first+' '+p.last;
+  document.getElementById('avatar').textContent=(p.first[0]||'?').toUpperCase();
+  const st=curStore();document.getElementById('profStore').textContent=st.full;document.getElementById('profStoreAddr').textContent=st.street+', '+st.zip;
+  ['First','Last','Mail','Phone','Addr'].forEach(k=>document.getElementById('p'+k).value=p[k.toLowerCase()]);
+  const n=[['reminder','Kontaktlinsen-Erinnerung','Wenn Ihr Vorrat zur Neige geht'],['appt','Terminerinnerung','24 h vor Ihrem Termin'],['repair','Reparatur-Status','Wenn Ihre Brille abholbereit ist'],['offers','Angebote & News','Aktionen Ihrer Filiale']];
+  document.getElementById('notifCard').innerHTML=n.map(x=>`<div class="list-item"><div class="grow"><b>${x[1]}</b><div class="muted-s">${x[2]}</div></div><button class="toggle ${S.notif[x[0]]?'on':''}" onclick="toggleNotif('${x[0]}')" aria-label="${x[1]}"></button></div>`).join('');
+}
+
+/* ===================== Aktionen ===================== */
+function toggleNotif(k){S.notif[k]=!S.notif[k];persist();render()}
+function saveProfile(){
+  ['First','Last','Mail','Phone','Addr'].forEach(k=>S.profile[k.toLowerCase()]=document.getElementById('p'+k).value.trim());
+  persist();render();toast('Profil gespeichert');
+}
+function cancelAppt(id){if(confirm('Termin wirklich stornieren?')){S.appts=S.appts.filter(a=>a.id!==id);persist();render();toast('Termin storniert')}}
+function resetDemo(){if(confirm('Alle Demo-Daten zurücksetzen?')){S=JSON.parse(JSON.stringify(DEFAULT));persist();render();toast('Zurückgesetzt')}}
+function sharePass(id){
+  const g=S.glasses.find(x=>x.id===id);
+  const txt=`Brillenpass ${g.name}\nR: Sph ${g.R.sph} Zyl ${g.R.cyl} A ${g.R.ax} Add ${g.R.add}\nL: Sph ${g.L.sph} Zyl ${g.L.cyl} A ${g.L.ax} Add ${g.L.add}\nPD ${g.pd} mm`;
+  if(navigator.share) navigator.share({title:'Brillenpass',text:txt}).catch(()=>{});
+  else {try{navigator.clipboard.writeText(txt);toast('In Zwischenablage kopiert')}catch(e){toast('Teilen nicht verfügbar')}}
+}
+let toastT;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* ===================== Bottom Sheets ===================== */
+const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
+function openSheet(kind,arg){
+  ({damage:sheetDamage,order:sheetOrder,book:sheetBook,store:sheetStore})[kind](arg);
+  sheet.classList.add('on');scrim.classList.add('on');
+}
+function closeSheet(){sheet.classList.remove('on');scrim.classList.remove('on')}
+function setSheet(title,html){document.getElementById('sheetTitle').textContent=title;document.getElementById('sheetBody').innerHTML=html;document.getElementById('sheetBody').scrollTop=0}
+function successView(title,text){
+  setSheet('',`<div class="success"><div class="big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+  <h1 style="font-size:26px">${title}</h1><p class="sub" style="margin-top:6px">${text}</p></div><button class="btn mt" style="margin-top:20px" onclick="closeSheet()">Fertig</button>`);
+  render();
+}
+function pickChip(el){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on')}
+
+/* --- Filiale wählen --- */
+function storeOpts(sel,fn){
+  return Object.values(STORES).map(x=>`<button class="store-opt ${x.id===sel?'on':''}" onclick="${fn}('${x.id}')"><span class="radio"></span><div class="grow"><b>${x.full}</b><div class="muted-s">${x.street}, ${x.zip} · ${x.tel}</div></div></button>`).join('');
+}
+function sheetStore(first){
+  setSheet(first?'Willkommen bei Optik Falkner':'Filiale wählen',`
+    <p class="sub">${first?'In welcher Filiale sind Sie Kunde? Sie können das jederzeit ändern.':'Ihre Stammfiliale für Termine, Abholungen und Reparaturen.'}</p>
+    ${storeOpts(S.store,'setStore')}`);
+}
+
+/* --- Schaden melden --- */
+function sheetDamage(gid){
+  setSheet('Schaden melden',`
+    <p class="sub">Beschreiben Sie kurz den Schaden – wir melden uns innerhalb von 24 h.</p>
+    <label class="f">Betroffene Brille</label>
+    <select class="input" id="dGlass">${S.glasses.map(g=>`<option value="${g.id}" ${g.id===gid?'selected':''}>${esc(g.name)} – ${esc(g.frame)}</option>`).join('')}</select>
+    <label class="f">Art des Schadens</label>
+    <div class="chips" id="dType">${['Glas zerkratzt','Glas gebrochen','Bügel lose/gebrochen','Nasenpad','Schraube fehlt','Sitzt schief','Sonstiges'].map((t,i)=>`<button class="chip ${i===0?'on':''}" onclick="pickChip(this)">${t}</button>`).join('')}</div>
+    <label class="f">Beschreibung</label>
+    <textarea class="input" id="dText" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht."></textarea>
+    <label class="f">Fotos (optional)</label>
+    <label class="upload"><input type="file" accept="image/*" multiple hidden onchange="previewImgs(this)">📷 Fotos aufnehmen oder auswählen</label>
+    <div class="thumbs" id="thumbs"></div>
+    <label class="f">Wie möchten Sie vorgehen?</label>
+    <div class="chips"><button class="chip on" onclick="pickChip(this)">In Filiale ${esc(curStore().name)} vorbeibringen</button><button class="chip" onclick="pickChip(this)">Rückruf erwünscht</button><button class="chip" onclick="pickChip(this)">Einsenden</button></div>
+    <button class="btn accent mt" style="margin-top:20px" onclick="submitDamage()">Meldung absenden</button>`);
+}
+function previewImgs(inp){
+  const t=document.getElementById('thumbs');t.innerHTML='';
+  [...inp.files].slice(0,4).forEach(f=>{const r=new FileReader();r.onload=e=>{const i=document.createElement('img');i.src=e.target.result;t.appendChild(i)};r.readAsDataURL(f)});
+}
+function submitDamage(){
+  const g=S.glasses.find(x=>x.id===document.getElementById('dGlass').value);
+  const type=document.querySelector('#dType .chip.on').textContent;
+  S.tickets.unshift({id:'t'+Date.now(),kind:'Schadensmeldung',title:type+' – '+g.name,status:'In Prüfung',date:new Date().toISOString().slice(0,10)});
+  persist();
+  successView('Meldung gesendet','Vorgangsnr. SM-'+String(Date.now()).slice(-5)+'. Die Filiale '+curStore().name+' prüft den Schaden und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
+}
+
+/* --- Kontaktlinsen nachbestellen --- */
+let qty=1, delivery='pickup';
+function sheetOrder(){
+  qty=1;delivery='pickup';
+  const L=S.lenses;
+  setSheet('Kontaktlinsen nachbestellen',`
+    <div class="card" style="background:var(--surface-2);box-shadow:none">
+      <h3>${esc(L.product)}</h3>
+      <div class="muted-s">R: BC ${L.R.bc} · DIA ${L.R.dia} · Sph ${L.R.sph}<br>L: BC ${L.L.bc} · DIA ${L.L.dia} · Sph ${L.L.sph}</div>
+      <div class="muted-s mt">Werte aus Ihrem Kontaktlinsenpass</div>
+    </div>
+    <label class="f">Menge (${esc(L.pack)} je Auge)</label>
+    <div class="row"><div class="stepper"><button onclick="chQty(-1)">−</button><b id="qty">1</b><button onclick="chQty(1)">+</button></div><div class="grow muted-s" id="qtyInfo"></div></div>
+    <label class="f">Lieferung</label>
+    <div class="chips"><button class="chip on" onclick="pickChip(this);setDel('pickup')">Abholung in ${esc(curStore().name)} · gratis</button><button class="chip" onclick="pickChip(this);setDel('ship')">Versand nach Hause · € 4,90</button></div>
+    <div id="addrBox"></div>
+    <div class="card mt" style="background:var(--surface-2);box-shadow:none;margin-top:18px">
+      <div class="row"><span class="grow">Zwischensumme</span><b id="sub"></b></div>
+      <div class="row mt"><span class="grow">Versand</span><b id="ship"></b></div>
+      <div class="row mt" style="font-size:18px"><span class="grow"><b>Gesamt</b></span><b id="tot"></b></div>
+    </div>
+    <button class="btn accent mt" style="margin-top:16px" onclick="submitOrder()">Kostenpflichtig bestellen</button>
+    <p class="muted-s" style="text-align:center;margin-top:10px">Bezahlung bei Abholung bzw. per Rechnung</p>`);
+  updOrder();
+}
+function chQty(d){qty=Math.min(6,Math.max(1,qty+d));updOrder()}
+function setDel(d){delivery=d;updOrder()}
+function updOrder(){
+  const L=S.lenses, sub=L.price*2*qty, sh=delivery==='ship'?4.9:0;
+  document.getElementById('qty').textContent=qty;
+  document.getElementById('qtyInfo').textContent=`= ${2*qty} Boxen · reicht ca. ${qty*3} Monate`;
+  document.getElementById('sub').textContent=eur(sub);
+  document.getElementById('ship').textContent=sh?eur(sh):'gratis';
+  document.getElementById('tot').textContent=eur(sub+sh);
+  document.getElementById('addrBox').innerHTML=delivery==='ship'?`<label class="f">Lieferadresse</label><input class="input" value="${esc(S.profile.addr)}">`:'';
+}
+function submitOrder(){
+  S.lenses.stockDays+=qty*90;
+  S.tickets.unshift({id:'t'+Date.now(),kind:'Bestellung',title:`${2*qty}× ${S.lenses.product}`,status:delivery==='ship'?'Versand vorbereitet':'Wird bereitgelegt',date:new Date().toISOString().slice(0,10)});
+  persist();
+  successView('Bestellung erhalten',delivery==='ship'?'Ihre Linsen werden in 2–3 Werktagen geliefert. Eine Bestätigung ist unterwegs an '+esc(S.profile.mail)+'.':'Wir benachrichtigen Sie, sobald Ihre Linsen in der Filiale '+curStore().name+' abholbereit sind.');
+}
+
+/* --- Termin buchen --- */
+let bk={};
+function sheetBook(){
+  bk={store:curStore().id,type:null,day:null,time:null};
+  const types=[['Augenkontrolle','3D-Messung, Augenmuskeln, Nachtsicht · 30 Min'],['Brillenglasberatung','45 Min'],['Kontaktlinsen-Anpassung','60 Min'],['Kontaktlinsen-Kontrolle','20 Min'],['Reparatur / Anpassung','15 Min']];
+  setSheet('Termin buchen',`
+    <label class="f" style="margin-top:0">1. Filiale</label>
+    <div id="bStore">${storeOpts(bk.store,'selStore')}</div>
+    <label class="f">2. Leistung</label>
+    <div id="bType">${types.map(t=>`<button class="list-item" style="width:100%;text-align:left" onclick="selType(this,'${t[0]}')"><div class="grow"><b>${t[0]}</b><div class="muted-s">${t[1]}</div></div><span class="badge info" style="visibility:hidden">✓</span></button>`).join('')}</div>
+    <label class="f">3. Tag</label>
+    <div class="days" id="days"></div>
+    <label class="f">4. Uhrzeit</label>
+    <div class="slots" id="slots"></div>
+    <label class="f">Anmerkung (optional)</label>
+    <input class="input" id="bNote" placeholder="z. B. neue Gleitsichtbrille gewünscht">
+    <button class="btn accent" id="bBtn" style="margin-top:20px" disabled onclick="submitBook()">Termin verbindlich buchen</button>`);
+  renderDays();
+}
+function selStore(id){bk.store=id;bk.day=null;bk.time=null;document.getElementById('bStore').innerHTML=storeOpts(id,'selStore');renderDays();chkBook()}
+function renderDays(){
+  const st=STORES[bk.store],out=[];
+  for(let i=1;i<=14;i++){const d=new Date();d.setDate(d.getDate()+i);const wd=(d.getDay()+6)%7,closed=!st.hours[wd].length;
+    out.push(`<button class="day" ${closed?'disabled':''} data-d="${d.toISOString().slice(0,10)}" onclick="selDay(this)"><small>${d.toLocaleDateString('de-AT',{weekday:'short'})}</small><b>${d.getDate()}</b></button>`)}
+  document.getElementById('days').innerHTML=out.join('');
+  document.getElementById('slots').innerHTML='<p class="muted-s" style="grid-column:1/-1">Bitte zuerst einen Tag wählen.</p>';
+}
+function selType(el,t){bk.type=t;document.querySelectorAll('#bType .badge').forEach(b=>b.style.visibility='hidden');el.querySelector('.badge').style.visibility='visible';chkBook()}
+function slotsFor(st,iso){
+  const wd=(new Date(iso+'T12:00').getDay()+6)%7,res=[];
+  st.hours[wd].forEach(([f,t])=>{let [h,m]=f.split(':').map(Number);const [eh,em]=t.split(':').map(Number);
+    while(h*60+m+30<=eh*60+em){res.push(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'));m+=30;if(m>=60){h++;m-=60}}});
+  return res;
+}
+function selDay(el){
+  document.querySelectorAll('.day').forEach(d=>d.classList.remove('on'));el.classList.add('on');bk.day=el.dataset.d;bk.time=null;
+  const slots=slotsFor(STORES[bk.store],bk.day), seed=parseInt(bk.day.replace(/-/g,''))%7;
+  document.getElementById('slots').innerHTML=slots.map((s,i)=>`<button class="slot" ${(i+seed)%4===0?'disabled':''} onclick="selSlot(this,'${s}')">${s}</button>`).join('');
+  chkBook();
+}
+function selSlot(el,s){document.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));el.classList.add('on');bk.time=s;chkBook()}
+function chkBook(){document.getElementById('bBtn').disabled=!(bk.store&&bk.type&&bk.day&&bk.time)}
+function submitBook(){
+  S.appts.push({id:'a'+Date.now(),type:bk.type,date:bk.day,time:bk.time,store:bk.store});
+  persist();
+  successView('Termin gebucht',`${esc(bk.type)} am ${fmtDate(bk.day,{weekday:'long',day:'numeric',month:'long'})} um ${bk.time} Uhr in der Filiale ${STORES[bk.store].name}. Wir freuen uns auf Sie!`);
+}
+
+render();
+// Beim ersten Start Filiale abfragen
+if(!S.store){setTimeout(()=>openSheet('store',true),400)}
+</script>
+</body>
+</html>
