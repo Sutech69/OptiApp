@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Optik Falkner">
 <title>Optik Falkner – Kunden-App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Montserrat:wght@600;700&family=Titillium+Web:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f3f2f0; --surface:#ffffff; --surface-2:#f8f7f5; --ink:#1c1c1f; --muted:#6e6e74;
@@ -173,6 +173,46 @@ textarea.input{min-height:90px;resize:vertical}
 .voucher code{font-family:ui-monospace,monospace;font-size:20px;font-weight:700;letter-spacing:.12em;color:var(--accent)}
 .head-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;box-shadow:var(--shadow)}
 
+/* Logo Falkner */
+.logo{gap:9px}
+.falcon{width:46px;height:46px;display:grid;place-items:center;flex-shrink:0}
+.falcon img{width:100%;height:100%;object-fit:contain}
+.falcon.nofalcon img{display:none}
+.falcon.nofalcon::after{content:"";width:60%;height:60%;border-radius:50%;background:var(--accent)}
+.wordmark{display:flex;flex-direction:column;gap:3px;line-height:1}
+.wm-top{background:#1d1d1b;color:#fff;font-family:'Montserrat',sans-serif;font-weight:600;font-size:13px;letter-spacing:.3em;padding:4px 3px 4px 8px;text-align:center}
+.wm-sub{color:#c4161c;font-family:'Titillium Web',sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.07em;white-space:nowrap}
+@media (prefers-color-scheme: dark){.wm-top{background:#000;box-shadow:0 0 0 1px #3a3a40}.wm-sub{color:#ef4a50}}
+/* Push-Simulation */
+.push{position:absolute;left:12px;right:12px;top:10px;z-index:40;background:var(--surface);border-radius:18px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center;transform:translateY(-140%);transition:transform .4s cubic-bezier(.2,.8,.2,1);text-align:left;width:auto}
+.push.on{transform:none}
+.push .falcon{width:40px;height:40px;border-radius:10px;background:var(--surface-2)}.push .falcon img{width:80%;height:80%}
+.push small{color:var(--muted);font-size:12px}
+@media (max-width:599px){.push{position:fixed;max-width:416px;margin:0 auto}}
+.notice{display:flex;gap:12px;align-items:center;text-align:left;width:100%;margin-top:14px;padding:14px 16px;border-radius:var(--radius);background:var(--warn-soft);color:var(--ink)}
+.notice .big-star{font-size:24px}
+/* Sterne */
+.stars{display:flex;gap:6px;justify-content:center;margin:10px 0 4px}
+.stars button{font-size:38px;line-height:1;color:var(--line);padding:2px}
+.stars button.on{color:#f0a71f}
+.stars-s{color:#f0a71f;letter-spacing:1px}
+/* Zusammenfassung */
+.sum{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:14px;margin-top:6px}
+.sum span{color:var(--muted)}
+.sum b{font-weight:600;word-break:break-word}
+.kasko-box{padding:14px;border-radius:14px;background:var(--ok-soft);margin-top:4px}
+.kasko-box.off{background:var(--warn-soft)}
+.btn.outline{background:transparent;border:2px solid var(--accent);color:var(--accent);margin-top:10px}
+/* News */
+.news-card{padding:0;overflow:hidden}
+.news-card .nc-body{padding:16px 18px 18px}
+.news-card .nc-band{height:6px;background:var(--accent)}
+.news-card .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.news-card p{color:var(--muted);margin-top:6px;font-size:14px}
+nav.bottom button{position:relative}
+.nav-dot{position:absolute;top:4px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:99px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.num-in{width:72px;text-align:center;font-size:18px;font-weight:700;padding:8px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2)}
+
 /* Filial-Pill */
 .store-pill{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:13px;font-weight:600}
 .store-pill .sdot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
@@ -229,9 +269,9 @@ nav.bottom button.on{color:var(--brand)}
 <div class="app" id="app">
 
   <header class="top">
-    <div class="logo">
-      <div class="logo-mark" style="background:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="stroke:#fff"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
-      <div><div class="logo-text" style="line-height:1">Falkner</div><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Sehzentrum</div></div>
+    <div class="logo" aria-label="Falkner Optik Sehzentrum">
+      <span class="falcon"><img src="data:image/png;base64,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" alt="Falke"></span>
+      <div class="wordmark"><span class="wm-top">FALKNER</span><span class="wm-sub">OPTIK · SEHZENTRUM</span></div>
     </div>
     <div class="row" style="gap:8px">
     <button class="store-pill" onclick="openSheet('store')" aria-label="Filiale wählen"><span class="sdot"></span><span id="pillName">Perg</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -244,11 +284,9 @@ nav.bottom button.on{color:var(--brand)}
     <!-- START -->
     <section class="view active" id="v-home">
       <h1 class="greet" id="greetName">Hallo!</h1>
-
+      <div id="reviewNotice"></div>
       <div class="hero" id="heroCard"></div>
-
       <div class="tiles" id="passTiles"></div>
-
       <h2>Service</h2>
       <div class="card actions">
         <button class="list-item" onclick="openSheet('book')"><span class="aic ic-c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><div class="grow"><b>Termin buchen</b></div><span class="chev">›</span></button>
@@ -271,23 +309,17 @@ nav.bottom button.on{color:var(--brand)}
       <div id="lensesContent" class="mt"></div>
     </section>
 
-    <!-- TERMINE -->
-    <section class="view" id="v-appt">
-      <h1>Termine</h1>
-      <p class="sub">Buchen und verwalten Sie Ihre Besuche.</p>
-      <button class="btn mt" style="margin-top:18px" onclick="openSheet('book')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Neuen Termin buchen
-      </button>
-      <h2>Bevorstehend</h2>
-      <div id="apptList"></div>
-      <h2>Meine Meldungen &amp; Bestellungen</h2>
-      <div id="ticketList"></div>
+    <!-- NEWS -->
+    <section class="view" id="v-news">
+      <h1>News</h1>
+      <p class="sub">Neuigkeiten aus Ihrem Sehzentrum.</p>
+      <div id="newsList" class="mt"></div>
     </section>
 
     <!-- FILIALE -->
     <section class="view" id="v-store">
       <h1>Meine Filiale</h1>
-      <p class="sub">Wählen Sie Ihre Stammfiliale.</p>
+      <p class="sub">Termine, Kontakt und Öffnungszeiten.</p>
       <div class="seg" id="storeSeg"></div>
       <div id="storeView"></div>
     </section>
@@ -311,13 +343,16 @@ nav.bottom button.on{color:var(--brand)}
       <div class="card"><div class="row"><div class="grow"><b id="profStore"></b><div class="muted-s" id="profStoreAddr"></div></div><button class="btn ghost" style="width:auto;padding:10px 14px" onclick="openSheet('store')">Ändern</button></div></div>
       <h2>Benachrichtigungen</h2>
       <div class="card" id="notifCard"></div>
+      <h2>Feedback</h2>
+      <div class="card" id="appRateCard"></div>
       <h2>Datenschutz</h2>
       <div class="card">
         <div class="list-item"><div class="grow">Datenschutzerklärung</div><span class="chev">›</span></div>
         <div class="list-item"><div class="grow">Meine Daten exportieren</div><span class="chev">›</span></div>
+        <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.3 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.4 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -325,9 +360,11 @@ nav.bottom button.on{color:var(--brand)}
     <button class="on" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>Start</button>
     <button data-view="glasses" onclick="go('glasses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6.5" cy="14" r="4"/><circle cx="17.5" cy="14" r="4"/><path d="M10.5 14h3M2.5 14 4 8M21.5 14 20 8"/></svg>Brille</button>
     <button data-view="lenses" onclick="go('lenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Linsen</button>
-    <button data-view="appt" onclick="go('appt')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Termine</button>
+    <button data-view="news" onclick="go('news')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13v16H6a2 2 0 0 1-2-2Z"/><path d="M17 8h3v10a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3"/></svg>News<span class="nav-dot" id="newsDot" style="display:none"></span></button>
     <button data-view="store" onclick="go('store')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>Filiale</button>
   </nav>
+
+  <button class="push" id="push" onclick="pushTap()"><span class="falcon"><img src="data:image/png;base64,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" alt="Falke"></span><div class="grow"><b style="font-size:14px">Optik Falkner</b> <small>· jetzt</small><div style="font-size:14px" id="pushText"></div></div></button>
 
   <div class="scrim" id="scrim" onclick="closeSheet()"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true">
@@ -344,11 +381,13 @@ nav.bottom button.on{color:var(--brand)}
 const STORES={
   perg:{id:'perg',name:'Perg',full:'Sehzentrum Falkner Perg',street:'Herrenstraße 4',zip:'4320 Perg',
     tel:'07262 53309',telLink:'+43726253309',mail:'office@optik-falkner.at',
+    lat:48.2497664,lng:14.6347744,review:'https://search.google.com/local/writereview?placeid=ChIJ-13VdPSxc0cResxHmvSltyE',
     hours:[[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00'],['14:00','18:00']],[['08:30','12:00']],[]],
     note:'',
     services:['Augenkontrolle','3D-Sehstärkenmessung','Augenmuskelkontrolle','Augendruckmessung','Gleitsicht','Kontaktlinsenanpassung','Nachtlinsen (Ortho-K)','Myopie-Management','Hauseigene Werkstatt','Brillen-Kaskoversicherung']},
   dimbach:{id:'dimbach',name:'Dimbach',full:'Optik Falkner Dimbach',street:'Dimbach 16',zip:'4371 Dimbach',
     tel:'07262 533095',telLink:'+437262533095',mail:'dimbach@optik-falkner.at',
+    lat:48.3163417,lng:14.9125508,review:'https://www.google.com/maps/search/?api=1&query=Optik+Falkner+Dimbach+16+4371+Dimbach',
     hours:[[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00']],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['07:30','12:00'],['14:30','17:00'],['17:00','18:00',1]],[['09:00','12:00',1]],[]],
     note:'17–18 Uhr und Samstag nur nach Terminvereinbarung',
     services:['Augenkontrolle','Brillenberatung','Kontaktlinsen','Reparaturservice']}
@@ -357,65 +396,97 @@ const DAYN=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Son
 const curStore=()=>STORES[S.store]||STORES.perg;
 
 /* ===================== Beispieldaten ===================== */
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+const today=()=>new Date().toISOString().slice(0,10);
 const DEFAULT = {
   profile:{first:'Julian',last:'Karlinger',mail:'julian.karlinger@example.at',phone:'+43 660 123 4567',addr:'Musterweg 3, 4320 Perg'},
   store:null,
-  notif:{reminder:true,appt:true,offers:false,repair:true},
+  notif:{reminder:true,appt:true,review:true,offers:false,repair:true},
   glasses:[
     {id:'g1',date:'2026-03-14',
-     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'+1,50'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'+1,50'},pd:'31,5 / 32,0'},
+     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'+1,50'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'+1,50'},pd:'31,5 / 32,0',
+     kasko:{until:'2028-03-14',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'}},
     {id:'g2',date:'2025-05-22',
-     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'–'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'–'},pd:'31,5 / 32,0'}
+     R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'–'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'–'},pd:'31,5 / 32,0',
+     kasko:{until:'2026-05-22',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'}}
   ],
-  lenses:{product:'Acuvue Oasys 1-Day',maker:'Johnson & Johnson',type:'Tageslinse',date:'2026-02-03',
-    R:{bc:'8,5',dia:'14,3',sph:'-2,00'},L:{bc:'8,5',dia:'14,3',sph:'-2,25'},
-    pack:'90er Box',price:64.90,stockDays:23,totalDays:90},
+  // kind: 'sphärisch' | 'torisch' | 'multifokal' – Produktname wird bewusst nicht angezeigt
+  lenses:{kind:'sphärisch',wear:'Tageslinse',daysPerLens:1,boxSize:90,date:'2026-02-03',
+    R:{bc:'8,5',dia:'14,3',sph:'-2,00',cyl:'–',ax:'–',add:'–'},L:{bc:'8,5',dia:'14,3',sph:'-2,25',cyl:'–',ax:'–',add:'–'},
+    price:64.90,stock:{R:23,L:23,updated:addDays(0)}},
   loyalty:{points:3,goal:5,reward:'Pflegemittel-Set gratis',vouchers:[]},
-  appts:[{id:'a1',type:'Kontaktlinsen-Kontrolle',date:addDays(9),time:'10:30',store:'perg'}],
-  tickets:[{id:'t1',kind:'Reparatur',title:'Nasenpad an Brille ersetzt',status:'Abgeschlossen',date:'2026-08-30'}]
+  appts:[{id:'a0',type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:'perg',rated:false},
+         {id:'a1',type:'Kontaktlinsen-Kontrolle',date:addDays(9),time:'10:30',store:'perg'}],
+  tickets:[{id:'t1',kind:'Reparatur',title:'Nasenpad an Brille ersetzt',status:'Abgeschlossen',date:'2026-08-30'}],
+  reviews:[], appReview:null, newsRead:[]
 };
-function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+// Beispiel-News (werden später von der Filiale gepflegt)
+const NEWS=[
+  {id:'n1',date:'2026-10-13',store:'all',tag:'Augenkontrolle',title:'Zeit für den Herbst-Check',text:'Gerade in der dunklen Jahreszeit merkt man Sehschwächen schneller. Wir prüfen Sehstärke, Augenmuskeln und auf Wunsch den Augendruck.',cta:['Termin buchen',"openSheet('book')"]},
+  {id:'n2',date:'2026-10-06',store:'perg',tag:'Neu im Sortiment',title:'Neue Fassungen eingetroffen',text:'Die neuen Modelle von Etnia Barcelona und ProDesign Denmark sind ab sofort in Perg zum Anprobieren da.'},
+  {id:'n3',date:'2026-09-29',store:'dimbach',tag:'Info',title:'Abendtermine in Dimbach',text:'Montag sowie Mittwoch bis Freitag sind wir von 17 bis 18 Uhr nach Terminvereinbarung für Sie da.',cta:['Termin buchen',"openSheet('book')"]},
+  {id:'n4',date:'2026-09-15',store:'all',tag:'Tipp',title:'Kontaktlinsen richtig pflegen',text:'Hände waschen, nur frisches Pflegemittel verwenden und den Behälter regelmäßig tauschen – so bleiben Ihre Augen gesund.'},
+  {id:'n5',date:'2026-09-01',store:'all',tag:'Kinder',title:'Myopie-Management',text:'Kurzsichtigkeit bei Kindern lässt sich bremsen. Wir beraten Sie gerne zu speziellen Brillengläsern und Linsen.'}
+];
+const LENS_KIND={'sphärisch':'Sphärische Kontaktlinsen','torisch':'Torische Kontaktlinsen','multifokal':'Multifokale Kontaktlinsen'};
+const LENS_HINT={'sphärisch':'Korrigieren Kurz- oder Weitsichtigkeit','torisch':'Zusätzlich mit Hornhautverkrümmungs-Korrektur','multifokal':'Für Nähe und Ferne (Alterssichtigkeit)'};
 
 let S;
-try{S=JSON.parse(localStorage.getItem('falkner-v6'))}catch(e){}
+try{S=JSON.parse(localStorage.getItem('falkner-v7'))}catch(e){}
 if(!S) S=JSON.parse(JSON.stringify(DEFAULT));
-function persist(){try{localStorage.setItem('falkner-v6',JSON.stringify(S))}catch(e){}}
+function persist(){try{localStorage.setItem('falkner-v7',JSON.stringify(S))}catch(e){}}
 
 const fmtDate=(iso,opt={day:'2-digit',month:'2-digit',year:'numeric'})=>new Date(iso+'T12:00').toLocaleDateString('de-AT',opt);
 const eur=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const apptTime=x=>new Date(x.date+'T'+x.time);
+const starStr=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+
+/* ===================== Kontaktlinsen-Vorrat ===================== */
+function lensStock(){
+  const L=S.lenses, el=Math.max(0,Math.floor((new Date(today())-new Date(L.stock.updated))/864e5));
+  const used=Math.floor(el/L.daysPerLens);
+  const R=Math.max(0,L.stock.R-used), Lf=Math.max(0,L.stock.L-used);
+  return {R,L:Lf,days:Math.min(R,Lf)*L.daysPerLens};
+}
+function setStock(R,L){S.lenses.stock={R,L,updated:today()}}
 
 /* ===================== Navigation ===================== */
 function go(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));
   document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   document.getElementById('main').scrollTop=0;
+  if(v==='news'){visibleNews().forEach(n=>{if(!S.newsRead.includes(n.id))S.newsRead.push(n.id)});persist()}
   render();
 }
 
 /* ===================== Render ===================== */
-function render(){document.getElementById('pillName').textContent=curStore().name;renderHome();renderGlasses();renderLenses();renderAppts();renderStore();renderProfile()}
+function render(){document.getElementById('pillName').textContent=curStore().name;renderHome();renderGlasses();renderLenses();renderNews();renderStore();renderProfile()}
 
 const ICON_GLASSES='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6.5" cy="14" r="4"/><circle cx="17.5" cy="14" r="4"/><path d="M10.5 14h3M2.5 14 4 8M21.5 14 20 8"/></svg>';
 const ICON_LENS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 const stamps=(mini)=>{const Y=S.loyalty;let h='';for(let i=0;i<Y.goal;i++)h+=`<span class="stamp ${i<Y.points?'on':''}">${mini?'':CHECK}</span>`;return `<div class="stamps ${mini?'mini':''}">${h}</div>`};
 const latestGlasses=()=>[...S.glasses].sort((a,b)=>b.date.localeCompare(a.date))[0];
+const upcoming=()=>S.appts.filter(x=>apptTime(x)>=new Date()).sort((a,b)=>apptTime(a)-apptTime(b));
+const pendingReview=()=>S.notif.review?S.appts.filter(x=>apptTime(x)<new Date()&&!x.rated).sort((a,b)=>apptTime(b)-apptTime(a))[0]:null;
 
 function renderHome(){
   const h=new Date().getHours();
   document.getElementById('greetName').textContent=(h<11?'Guten Morgen':h<18?'Guten Tag':'Guten Abend')+', '+S.profile.first;
-  const next=[...S.appts].sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const pr=pendingReview();
+  document.getElementById('reviewNotice').innerHTML=pr?`<button class="notice" onclick="openSheet('rate',{kind:'store',appt:'${pr.id}'})"><span class="big-star">⭐</span><div class="grow"><b>Wie war Ihr Termin?</b><div class="muted-s">${esc(pr.type)} am ${fmtDate(pr.date)} · Jetzt bewerten</div></div><span class="chev">›</span></button>`:'';
+  const next=upcoming()[0];
   document.getElementById('heroCard').innerHTML = next
     ? `<div class="label">Nächster Termin</div><div class="big">${fmtDate(next.date,{weekday:'long',day:'numeric',month:'long'})}</div>
-       <div class="meta">${next.time} Uhr · ${esc(next.type)} · ${esc((STORES[next.store]||curStore()).name)}</div><button class="btn-light" onclick="go('appt')">Details ansehen</button>`
+       <div class="meta">${next.time} Uhr · ${esc(next.type)} · ${esc((STORES[next.store]||curStore()).name)}</div><button class="btn-light" onclick="go('store')">Details ansehen</button>`
     : `<div class="label">Kein Termin geplant</div><div class="big">Zeit für einen Sehtest?</div>
        <div class="meta">Wir empfehlen eine Kontrolle alle 12 Monate.</div><button class="btn-light" onclick="openSheet('book')">Jetzt buchen</button>`;
-  const L=S.lenses, low=L.stockDays<=30, g=latestGlasses(), V=S.loyalty.vouchers.length;
+  const st=lensStock(), low=st.days<=30, g=latestGlasses(), V=S.loyalty.vouchers.length;
   document.getElementById('passTiles').innerHTML=`
     <button class="tile" onclick="go('glasses')"><span class="ic">${ICON_GLASSES}</span><b>Brillenpass</b><span class="muted-s">${g?'Werte vom '+fmtDate(g.date):'Noch keine Werte'}</span></button>
     <button class="tile" onclick="go('lenses')"><span class="ic" style="background:var(--accent-soft);color:var(--accent)">${ICON_LENS}</span><b>Kontaktlinsenpass</b>
-      <span class="muted-s ${low?'warn':''}">${low?'Vorrat: noch '+L.stockDays+' Tage':'Vorrat ausreichend'}</span>
+      <span class="muted-s ${low?'warn':''}">${low?'Vorrat: noch '+st.days+' Tage':'Vorrat ausreichend'}</span>
       ${V?`<span class="badge warn" style="align-self:flex-start">🎁 Gutschein bereit</span>`:stamps(true)}</button>`;
 }
 
@@ -424,23 +495,32 @@ function rxTable(R,L,cols){
   const row=(e,o)=>`<tr><td><span class="eye">${e}</span></td>${cols.map(c=>`<td>${o[c[1]]}</td>`).join('')}</tr>`;
   return `<table class="rx"><tr><th></th>${head}</tr>${row('R',R)}${row('L',L)}</table>`;
 }
+const kaskoActive=g=>g.kasko&&g.kasko.until>=today();
 function renderGlasses(){
   const list=[...S.glasses].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('glassesContent').innerHTML=list.map((g,i)=>`
     <div class="card">
       <div class="row"><div class="grow"><h3>Messung vom ${fmtDate(g.date)}</h3></div>${i===0?'<span class="badge ok">Aktuell</span>':''}</div>
       ${rxTable(g.R,g.L,[['Sph','sph'],['Zyl','cyl'],['Achse','ax'],['Add','add']])}
-      <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div></div>
+      <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div>
+        <div><span>Vollkasko</span><b style="color:${kaskoActive(g)?'var(--ok)':'var(--muted)'}">${g.kasko?(kaskoActive(g)?'bis '+fmtDate(g.kasko.until):'abgelaufen'):'keine'}</b></div></div>
       <div class="btn-row"><button class="btn ghost" onclick="openSheet('damage','${g.id}')">Schaden melden</button><button class="btn ghost" onclick="sharePass('${g.id}')">Teilen</button></div>
+      <button class="btn outline" onclick="openSheet('kasko','${g.id}')">Vollkasko nutzen</button>
     </div>`).join('');
 }
 
+function lensCols(){
+  const k=S.lenses.kind, c=[['BC','bc'],['DIA','dia'],['Sph','sph']];
+  if(k==='torisch')c.push(['Zyl','cyl'],['Achse','ax']);
+  if(k==='multifokal')c.push(['Add','add']);
+  return c;
+}
 function renderLenses(){
-  const L=S.lenses, Y=S.loyalty, pct=Math.min(100,Math.round(L.stockDays/L.totalDays*100)), low=L.stockDays<=30, left=Y.goal-Y.points;
+  const L=S.lenses, Y=S.loyalty, st=lensStock(), low=st.days<=30, left=Y.goal-Y.points;
   document.getElementById('lensesContent').innerHTML=`
     <div class="card">
-      <div class="row"><div class="grow"><h3>${esc(L.product)}</h3><div class="muted-s">${esc(L.type)} · ${esc(L.pack)}</div></div><span class="badge ok">Aktiv</span></div>
-      ${rxTable(L.R,L.L,[['BC','bc'],['DIA','dia'],['Sph','sph']])}
+      <div class="row"><div class="grow"><h3>${LENS_KIND[L.kind]}</h3><div class="muted-s">${esc(L.wear)} · ${LENS_HINT[L.kind]}</div></div><span class="badge ok">Aktiv</span></div>
+      ${rxTable(L.R,L.L,lensCols())}
       <div class="kv"><div><span>Angepasst am</span><b>${fmtDate(L.date)}</b></div><div><span>Nächste Kontrolle</span><b>${fmtDate('2027-02-03')}</b></div></div>
       <button class="btn accent" style="margin-top:16px" onclick="openSheet('order')">Kontaktlinsen nachbestellen</button>
     </div>
@@ -456,58 +536,68 @@ function renderLenses(){
 
     <h2>Vorrat</h2>
     <div class="card">
-      <div class="row"><div class="grow"><b>Noch ca. ${L.stockDays} Tage</b></div><span class="badge ${low?'warn':'ok'}">${low?'Bald leer':'Ausreichend'}</span></div>
-      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="row"><div class="grow"><b>Noch ca. ${st.days} Tage</b><div class="muted-s">Rechts ${st.R} · Links ${st.L} Linsen übrig</div></div><span class="badge ${low?'warn':'ok'}">${low?'Bald leer':'Ausreichend'}</span></div>
+      <div class="progress"><i style="width:${Math.min(100,Math.round(st.days/(L.boxSize*L.daysPerLens)*100))}%"></i></div>
+      <button class="btn ghost" style="margin-top:14px" onclick="openSheet('stock')">Vorrat bearbeiten</button>
       <div class="row" style="margin-top:14px"><div class="grow"><b>Erinnerung</b><div class="muted-s">14 Tage bevor der Vorrat endet</div></div>
       <button class="toggle ${S.notif.reminder?'on':''}" onclick="toggleNotif('reminder')" aria-label="Erinnerung"></button></div>
     </div>`;
 }
 function redeem(code){S.loyalty.vouchers=S.loyalty.vouchers.filter(v=>v.code!==code);persist();render();toast('Gutschein eingelöst')}
 
-function renderAppts(){
-  const a=[...S.appts].sort((x,y)=>x.date.localeCompare(y.date));
-  document.getElementById('apptList').innerHTML=a.length?a.map(x=>`
-    <div class="card"><div class="row">
-      <div style="text-align:center;min-width:52px"><div class="muted-s" style="text-transform:uppercase">${fmtDate(x.date,{month:'short'})}</div><div style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1">${fmtDate(x.date,{day:'numeric'})}</div></div>
-      <div class="grow"><b>${esc(x.type)}</b><div class="muted-s">${fmtDate(x.date,{weekday:'long'})}, ${x.time} Uhr · Filiale ${esc((STORES[x.store]||curStore()).name)}</div></div></div>
-      <div class="btn-row"><button class="btn ghost" onclick="cancelAppt('${x.id}')">Stornieren</button><button class="btn ghost" onclick="toast('Zum Kalender hinzugefügt')">In Kalender</button></div>
-    </div>`).join(''):'<div class="card"><p class="sub">Keine bevorstehenden Termine.</p></div>';
-  document.getElementById('ticketList').innerHTML='<div class="card">'+(S.tickets.length?S.tickets.map(t=>`
-    <div class="list-item"><div class="grow"><b>${esc(t.title)}</b><div class="muted-s">${esc(t.kind)} · ${fmtDate(t.date)}</div></div><span class="badge ${t.status==='Abgeschlossen'?'ok':'info'}">${esc(t.status)}</span></div>`).join(''):'<p class="sub">Noch keine Einträge.</p>')+'</div>';
+/* --- News --- */
+const visibleNews=()=>NEWS.filter(n=>n.store==='all'||n.store===curStore().id);
+function renderNews(){
+  const list=visibleNews(), unread=list.filter(n=>!S.newsRead.includes(n.id)).length, dot=document.getElementById('newsDot');
+  dot.style.display=unread?'grid':'none'; dot.textContent=unread;
+  document.getElementById('newsList').innerHTML=list.map(n=>`
+    <div class="card news-card"><div class="nc-band"></div><div class="nc-body">
+      <span class="tag">${esc(n.tag)}${n.store!=='all'?' · '+STORES[n.store].name:''}</span>
+      <h3>${esc(n.title)}</h3><p>${esc(n.text)}</p>
+      <div class="row" style="margin-top:12px"><span class="grow muted-s">${fmtDate(n.date)}</span>${n.cta?`<button class="btn ghost" style="width:auto;padding:9px 14px" onclick="${n.cta[1]}">${n.cta[0]}</button>`:''}</div>
+    </div></div>`).join('')+'<p class="muted-s" style="text-align:center;margin-top:14px">Beispielinhalte – werden später von der Filiale gepflegt.</p>';
 }
 
+/* --- Filiale inkl. Termine --- */
 function openStatus(st){
   const now=new Date(),d=(now.getDay()+6)%7,hm=now.toTimeString().slice(0,5);
   const r=st.hours[d].find(x=>!x[2]&&hm>=x[0]&&hm<x[1]);
   return r?{o:true,t:'Jetzt geöffnet · bis '+r[1]+' Uhr'}:{o:false,t:'Derzeit geschlossen'};
 }
 function renderStore(){
-  const st=curStore(), today=(new Date().getDay()+6)%7, os=openStatus(st);
+  const st=curStore(), td=(new Date().getDay()+6)%7, os=openStatus(st), ll=st.lat+','+st.lng;
+  const my=S.reviews.filter(r=>r.store===st.id).slice(-1)[0];
+  const ap=upcoming();
   document.getElementById('storeSeg').innerHTML=Object.values(STORES).map(x=>`<button class="${x.id===st.id?'on':''}" onclick="setStore('${x.id}',true)">${x.name}</button>`).join('');
-  const q=encodeURIComponent(st.street+', '+st.zip);
   document.getElementById('storeView').innerHTML=`
     <div class="card mt" style="padding-top:18px">
-      <iframe class="mapframe" loading="lazy" title="Karte" src="https://maps.google.com/maps?q=${q}&z=15&output=embed"></iframe>
+      <iframe class="mapframe" loading="lazy" title="Karte" src="https://maps.google.com/maps?q=${ll}&z=16&output=embed"></iframe>
       <h3>${esc(st.full)}</h3>
-      <p class="sub">${esc(st.street)}, ${esc(st.zip)}</p>
+      <p class="sub">${esc(st.street)}, ${esc(st.zip)} · ${st.tel}</p>
       <p class="open-state ${os.o?'o':'c'} mt">${os.t}</p>
       <div class="btn-row">
         <a class="btn ghost" href="tel:${st.telLink}" style="text-decoration:none">Anrufen</a>
-        <a class="btn ghost" href="https://maps.google.com/?q=${q}" target="_blank" rel="noopener" style="text-decoration:none">Route</a>
+        <a class="btn ghost" href="https://www.google.com/maps/dir/?api=1&destination=${ll}" target="_blank" rel="noopener" style="text-decoration:none">Route</a>
         <a class="btn ghost" href="mailto:${st.mail}" style="text-decoration:none">E-Mail</a>
       </div>
       <button class="btn accent" style="margin-top:10px" onclick="openSheet('book')">Termin in ${esc(st.name)} buchen</button>
+      <button class="btn ghost" style="margin-top:10px" onclick="openSheet('rate',{kind:'store'})">${my?`<span class="stars-s">${starStr(my.stars)}</span>&nbsp; Bewertung ändern`:'⭐ Filiale '+esc(st.name)+' bewerten'}</button>
     </div>
+    <h2>Meine Termine</h2>
+    ${ap.length?ap.map(x=>`
+    <div class="card"><div class="row">
+      <div style="text-align:center;min-width:52px"><div class="muted-s" style="text-transform:uppercase">${fmtDate(x.date,{month:'short'})}</div><div style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1">${fmtDate(x.date,{day:'numeric'})}</div></div>
+      <div class="grow"><b>${esc(x.type)}</b><div class="muted-s">${fmtDate(x.date,{weekday:'long'})}, ${x.time} Uhr · Filiale ${esc((STORES[x.store]||st).name)}</div></div></div>
+      <div class="btn-row"><button class="btn ghost" onclick="cancelAppt('${x.id}')">Stornieren</button><button class="btn ghost" onclick="toast('Zum Kalender hinzugefügt')">In Kalender</button></div>
+    </div>`).join(''):'<div class="card"><p class="sub">Keine bevorstehenden Termine.</p></div>'}
+    <h2>Meine Anfragen &amp; Bestellungen</h2>
+    <div class="card">${S.tickets.length?S.tickets.map(t=>`
+      <div class="list-item"><div class="grow"><b>${esc(t.title)}</b><div class="muted-s">${esc(t.kind)} · ${fmtDate(t.date)}</div></div><span class="badge ${t.status==='Abgeschlossen'?'ok':'info'}">${esc(t.status)}</span></div>`).join(''):'<p class="sub">Noch keine Einträge.</p>'}</div>
     <h2>Öffnungszeiten</h2>
     <div class="card"><div class="hours">${st.hours.map((h,i)=>`
-      <span class="${i===today?'today':''}">${DAYN[i]}</span>
-      <span class="right ${i===today?'today':''}">${h.length?h.map(x=>x[0]+' – '+x[1]+(x[2]?'<small>nur mit Termin</small>':'')).join('<br>'):'geschlossen'}</span>`).join('')}
+      <span class="${i===td?'today':''}">${DAYN[i]}</span>
+      <span class="right ${i===td?'today':''}">${h.length?h.map(x=>x[0]+' – '+x[1]+(x[2]?'<small>nur mit Termin</small>':'')).join('<br>'):'geschlossen'}</span>`).join('')}
     </div>${st.note?`<p class="muted-s mt">${esc(st.note)}</p>`:''}</div>
-    <h2>Kontakt</h2>
-    <div class="card">
-      <div class="list-item"><div class="grow"><span class="muted-s">Telefon</span><br><b>${st.tel}</b></div></div>
-      <div class="list-item"><div class="grow"><span class="muted-s">E-Mail</span><br><b>${st.mail}</b></div></div>
-    </div>
     <h2>Leistungen</h2>
     <div class="card"><div class="chips">${st.services.map(x=>`<span class="chip">${x}</span>`).join('')}</div></div>`;
 }
@@ -520,8 +610,10 @@ function renderProfile(){
   document.getElementById('headAvatar').textContent=(p.first[0]||'?').toUpperCase();
   const st=curStore();document.getElementById('profStore').textContent=st.full;document.getElementById('profStoreAddr').textContent=st.street+', '+st.zip;
   ['First','Last','Mail','Phone','Addr'].forEach(k=>document.getElementById('p'+k).value=p[k.toLowerCase()]);
-  const n=[['reminder','Kontaktlinsen-Erinnerung','Wenn Ihr Vorrat zur Neige geht'],['appt','Terminerinnerung','24 h vor Ihrem Termin'],['repair','Reparatur-Status','Wenn Ihre Brille abholbereit ist'],['offers','Angebote & News','Aktionen Ihrer Filiale']];
+  const n=[['reminder','Kontaktlinsen-Erinnerung','Wenn Ihr Vorrat zur Neige geht'],['appt','Terminerinnerung','24 h vor Ihrem Termin'],['review','Bewertung nach Termin','Kurze Frage, wie Ihr Besuch war'],['repair','Reparatur-Status','Wenn Ihre Brille abholbereit ist'],['offers','Angebote & News','Neuigkeiten Ihrer Filiale']];
   document.getElementById('notifCard').innerHTML=n.map(x=>`<div class="list-item"><div class="grow"><b>${x[1]}</b><div class="muted-s">${x[2]}</div></div><button class="toggle ${S.notif[x[0]]?'on':''}" onclick="toggleNotif('${x[0]}')" aria-label="${x[1]}"></button></div>`).join('');
+  const ar=S.appReview;
+  document.getElementById('appRateCard').innerHTML=`<button class="list-item" style="width:100%;text-align:left" onclick="openSheet('rate',{kind:'app'})"><span class="aic" style="background:var(--warn-soft);font-size:18px">⭐</span><div class="grow"><b>App bewerten</b><div class="muted-s">${ar?'Ihre Bewertung: <span class="stars-s">'+starStr(ar.stars)+'</span>':'Wie gefällt Ihnen die App?'}</div></div><span class="chev">›</span></button>`;
 }
 
 /* ===================== Aktionen ===================== */
@@ -531,7 +623,7 @@ function saveProfile(){
   persist();render();toast('Profil gespeichert');
 }
 function cancelAppt(id){if(confirm('Termin wirklich stornieren?')){S.appts=S.appts.filter(a=>a.id!==id);persist();render();toast('Termin storniert')}}
-function resetDemo(){if(confirm('Alle Demo-Daten zurücksetzen?')){S=JSON.parse(JSON.stringify(DEFAULT));persist();render();toast('Zurückgesetzt')}}
+function resetDemo(){if(confirm('Alle Demo-Daten zurücksetzen?')){S=JSON.parse(JSON.stringify(DEFAULT));S.store='perg';persist();render();toast('Zurückgesetzt')}}
 function sharePass(id){
   const g=S.glasses.find(x=>x.id===id);
   const txt=`Brillenpass – Messung vom ${fmtDate(g.date)}\nR: Sph ${g.R.sph} Zyl ${g.R.cyl} A ${g.R.ax} Add ${g.R.add}\nL: Sph ${g.L.sph} Zyl ${g.L.cyl} A ${g.L.ax} Add ${g.L.add}\nPD ${g.pd} mm`;
@@ -541,17 +633,31 @@ function sharePass(id){
 let toastT;
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
 
+/* --- Push-Benachrichtigung (Simulation im Prototyp) --- */
+let pushT, pushAppt=null;
+function showPush(appt){
+  pushAppt=appt;
+  document.getElementById('pushText').textContent=`Wie war Ihre ${appt.type} am ${fmtDate(appt.date)}? Tippen zum Bewerten.`;
+  const p=document.getElementById('push'); p.classList.add('on'); clearTimeout(pushT); pushT=setTimeout(()=>p.classList.remove('on'),7000);
+}
+function pushTap(){document.getElementById('push').classList.remove('on');if(pushAppt)openSheet('rate',{kind:'store',appt:pushAppt.id})}
+function demoPush(){
+  let a=pendingReview();
+  if(!a){a={id:'a'+Date.now(),type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:curStore().id,rated:false};S.appts.push(a);S.notif.review=true;persist();render()}
+  go('home');setTimeout(()=>showPush(a),300);
+}
+
 /* ===================== Bottom Sheets ===================== */
 const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
 function openSheet(kind,arg){
-  ({damage:sheetDamage,order:sheetOrder,book:sheetBook,store:sheetStore})[kind](arg);
+  ({damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate})[kind](arg);
   sheet.classList.add('on');scrim.classList.add('on');
 }
 function closeSheet(){sheet.classList.remove('on');scrim.classList.remove('on')}
 function setSheet(title,html){document.getElementById('sheetTitle').textContent=title;document.getElementById('sheetBody').innerHTML=html;document.getElementById('sheetBody').scrollTop=0}
-function successView(title,text){
+function successView(title,text,extra){
   setSheet('',`<div class="success"><div class="big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-  <h1 style="font-size:26px">${title}</h1><p class="sub" style="margin-top:6px">${text}</p></div><button class="btn mt" style="margin-top:20px" onclick="closeSheet()">Fertig</button>`);
+  <h1 style="font-size:26px">${title}</h1><p class="sub" style="margin-top:6px">${text}</p></div>${extra||''}<button class="btn mt" style="margin-top:20px" onclick="closeSheet()">Fertig</button>`);
   render();
 }
 function pickChip(el){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on')}
@@ -566,47 +672,131 @@ function sheetStore(first){
     ${storeOpts(S.store,'setStore')}`);
 }
 
-/* --- Schaden melden --- */
-function sheetDamage(gid){
-  setSheet('Schaden melden',`
-    <p class="sub">Beschreiben Sie kurz den Schaden – wir melden uns innerhalb von 24 h.</p>
+/* --- Schaden melden & Vollkasko (mit Zusammenfassung) --- */
+const DMG_TYPES=['Glas zerkratzt','Glas gebrochen','Bügel lose/gebrochen','Nasenpad','Schraube fehlt','Sitzt schief','Sonstiges'];
+let dmg={};
+const howOpts=()=>['In Filiale '+curStore().name+' vorbeibringen','Rückruf erwünscht'];
+function sheetDamage(gid){dmg={gid:gid||latestGlasses().id,kasko:false,type:DMG_TYPES[0],text:'',photos:[],how:0};renderDamageForm()}
+function sheetKasko(gid){
+  const g=S.glasses.find(x=>x.id===gid)||latestGlasses();
+  if(!kaskoActive(g)){
+    setSheet('Vollkasko',`
+      <div class="kasko-box off"><b>Für diese Brille besteht derzeit keine aktive Vollkasko.</b>
+      <div class="muted-s" style="margin-top:4px">${g.kasko?'Die Versicherung ist am '+fmtDate(g.kasko.until)+' abgelaufen.':'Diese Brille wurde ohne Kasko gekauft.'}</div></div>
+      <p class="sub mt">Sie können den Schaden trotzdem melden – wir schauen uns die Brille gerne an.</p>
+      <button class="btn accent" style="margin-top:16px" onclick="sheetDamage('${g.id}')">Normalen Schaden melden</button>
+      <a class="btn ghost" style="margin-top:10px;text-decoration:none" href="tel:${curStore().telLink}">Filiale anrufen</a>`);
+    return;
+  }
+  dmg={gid:g.id,kasko:true,type:DMG_TYPES[1],text:'',photos:[],how:0};renderDamageForm();
+}
+function kaskoBox(g){return `<div class="kasko-box"><b>✓ Vollkasko aktiv bis ${fmtDate(g.kasko.until)}</b>
+  <div class="muted-s" style="margin-top:4px">Gedeckt: ${esc(g.kasko.cover)}<br>Selbstbehalt: ${esc(g.kasko.deductible)}</div></div>`}
+function renderDamageForm(){
+  const g=S.glasses.find(x=>x.id===dmg.gid);
+  setSheet(dmg.kasko?'Vollkasko nutzen':'Schaden melden',`
+    ${dmg.kasko?kaskoBox(g)+`<label class="f">Versicherte Brille</label><div class="input">Brille – Messung vom ${fmtDate(g.date)}</div>`
+      :`<p class="sub">Beschreiben Sie kurz den Schaden – wir melden uns innerhalb von 24 h.</p>
     <label class="f">Betroffene Brille</label>
-    <select class="input" id="dGlass">${S.glasses.map(g=>`<option value="${g.id}" ${g.id===gid?'selected':''}>Brille – Messung vom ${fmtDate(g.date)}</option>`).join('')}</select>
+    <select class="input" id="dGlass" onchange="dmg.gid=this.value">${S.glasses.map(x=>`<option value="${x.id}" ${x.id===dmg.gid?'selected':''}>Brille – Messung vom ${fmtDate(x.date)}</option>`).join('')}</select>`}
     <label class="f">Art des Schadens</label>
-    <div class="chips" id="dType">${['Glas zerkratzt','Glas gebrochen','Bügel lose/gebrochen','Nasenpad','Schraube fehlt','Sitzt schief','Sonstiges'].map((t,i)=>`<button class="chip ${i===0?'on':''}" onclick="pickChip(this)">${t}</button>`).join('')}</div>
+    <div class="chips" id="dType">${DMG_TYPES.map(t=>`<button class="chip ${t===dmg.type?'on':''}" onclick="pickChip(this);dmg.type='${t}'">${t}</button>`).join('')}</div>
     <label class="f">Beschreibung</label>
-    <textarea class="input" id="dText" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht."></textarea>
+    <textarea class="input" id="dText" oninput="dmg.text=this.value" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht.">${esc(dmg.text)}</textarea>
     <label class="f">Fotos (optional)</label>
     <label class="upload"><input type="file" accept="image/*" multiple hidden onchange="previewImgs(this)">📷 Fotos aufnehmen oder auswählen</label>
-    <div class="thumbs" id="thumbs"></div>
+    <div class="thumbs" id="thumbs">${dmg.photos.map(src=>`<img src="${src}">`).join('')}</div>
     <label class="f">Wie möchten Sie vorgehen?</label>
-    <div class="chips"><button class="chip on" onclick="pickChip(this)">In Filiale ${esc(curStore().name)} vorbeibringen</button><button class="chip" onclick="pickChip(this)">Rückruf erwünscht</button><button class="chip" onclick="pickChip(this)">Einsenden</button></div>
-    <button class="btn accent mt" style="margin-top:20px" onclick="submitDamage()">Meldung absenden</button>`);
+    <div class="chips">${howOpts().map((h,i)=>`<button class="chip ${i===dmg.how?'on':''}" onclick="pickChip(this);dmg.how=${i}">${esc(h)}</button>`).join('')}</div>
+    <button class="btn accent mt" style="margin-top:20px" onclick="damageSummary()">${dmg.kasko?'Kasko-Fall prüfen':'Meldung absenden'}</button>`);
 }
 function previewImgs(inp){
-  const t=document.getElementById('thumbs');t.innerHTML='';
-  [...inp.files].slice(0,4).forEach(f=>{const r=new FileReader();r.onload=e=>{const i=document.createElement('img');i.src=e.target.result;t.appendChild(i)};r.readAsDataURL(f)});
+  [...inp.files].slice(0,4-dmg.photos.length).forEach(f=>{const r=new FileReader();r.onload=e=>{dmg.photos.push(e.target.result);document.getElementById('thumbs').innerHTML=dmg.photos.map(src=>`<img src="${src}">`).join('')};r.readAsDataURL(f)});
+}
+function damageSummary(){
+  const g=S.glasses.find(x=>x.id===dmg.gid);
+  setSheet('Bitte Angaben prüfen',`
+    <p class="sub">Stimmt alles? Erst nach „Verbindlich absenden“ geht die Meldung an die Filiale.</p>
+    <div class="card" style="background:var(--surface-2);box-shadow:none;margin-top:14px">
+      <div class="sum">
+        <span>Art</span><b>${dmg.kasko?'Vollkasko-Fall':'Schadensmeldung'}</b>
+        <span>Brille</span><b>Messung vom ${fmtDate(g.date)}</b>
+        <span>Schaden</span><b>${esc(dmg.type)}</b>
+        <span>Beschreibung</span><b>${dmg.text.trim()?esc(dmg.text.trim()):'–'}</b>
+        <span>Fotos</span><b>${dmg.photos.length?dmg.photos.length+' Foto'+(dmg.photos.length>1?'s':''):'keine'}</b>
+        <span>Vorgehen</span><b>${esc(howOpts()[dmg.how])}</b>
+        <span>Filiale</span><b>${esc(curStore().full)}</b>
+        ${dmg.kasko?`<span>Selbstbehalt</span><b>${esc(g.kasko.deductible)}</b>`:''}
+      </div>
+      ${dmg.photos.length?`<div class="thumbs" style="margin-top:12px">${dmg.photos.map(src=>`<img src="${src}">`).join('')}</div>`:''}
+    </div>
+    <button class="btn accent" style="margin-top:18px" onclick="submitDamage()">Verbindlich absenden</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="renderDamageForm()">Angaben bearbeiten</button>`);
 }
 function submitDamage(){
-  const g=S.glasses.find(x=>x.id===document.getElementById('dGlass').value);
-  const type=document.querySelector('#dType .chip.on').textContent;
-  S.tickets.unshift({id:'t'+Date.now(),kind:'Schadensmeldung',title:type+' – Brille vom '+fmtDate(g.date),status:'In Prüfung',date:new Date().toISOString().slice(0,10)});
+  const g=S.glasses.find(x=>x.id===dmg.gid), nr=(dmg.kasko?'KF-':'SM-')+String(Date.now()).slice(-5);
+  S.tickets.unshift({id:'t'+Date.now(),kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+' – Brille vom '+fmtDate(g.date),status:'In Prüfung',date:today()});
   persist();
-  successView('Meldung gesendet','Vorgangsnr. SM-'+String(Date.now()).slice(-5)+'. Die Filiale '+curStore().name+' prüft den Schaden und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
+  successView(dmg.kasko?'Kasko-Fall gemeldet':'Meldung gesendet','Vorgangsnr. '+nr+'. Die Filiale '+curStore().name+' prüft '+(dmg.kasko?'den Kasko-Fall':'den Schaden')+' und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
+}
+
+/* --- Vorrat bearbeiten --- */
+let stk={};
+function sheetStock(){
+  const st=lensStock(); stk={R:st.R,L:st.L};
+  setSheet('Vorrat bearbeiten',`
+    <p class="sub">Wie viele Linsen haben Sie noch zu Hause? Die App rechnet daraus, wie lange Ihr Vorrat reicht.</p>
+    ${['R','L'].map(e=>`<div class="row" style="margin-top:16px"><div class="grow"><b>${e==='R'?'Rechtes':'Linkes'} Auge</b><div class="muted-s">Linsen übrig</div></div>
+      <div class="stepper"><button onclick="chStk('${e}',-1)">−</button><input class="num-in" type="number" min="0" inputmode="numeric" id="stk${e}" value="${stk[e]}" oninput="stk['${e}']=Math.max(0,parseInt(this.value)||0);updStk()"><button onclick="chStk('${e}',1)">+</button></div></div>`).join('')}
+    <div class="card" style="background:var(--surface-2);box-shadow:none;margin-top:18px"><div class="row"><span class="grow">Reicht noch für</span><b id="stkDays"></b></div>
+    <div class="muted-s mt">${esc(S.lenses.wear)}: 1 Linse pro Auge ${S.lenses.daysPerLens===1?'und Tag':'für '+S.lenses.daysPerLens+' Tage'}</div></div>
+    <button class="btn accent" style="margin-top:18px" onclick="saveStock()">Speichern</button>`);
+  updStk();
+}
+function chStk(e,d){stk[e]=Math.max(0,stk[e]+d);document.getElementById('stk'+e).value=stk[e];updStk()}
+function updStk(){document.getElementById('stkDays').textContent='ca. '+Math.min(stk.R,stk.L)*S.lenses.daysPerLens+' Tage'}
+function saveStock(){setStock(stk.R,stk.L);persist();closeSheet();render();toast('Vorrat aktualisiert')}
+
+/* --- Bewertungen (Filiale & App) --- */
+let rt={};
+function sheetRate(o){
+  rt={kind:o.kind,appt:o.appt||null,stars:0,text:''};
+  const appt=rt.appt&&S.appts.find(a=>a.id===rt.appt), st=appt?STORES[appt.store]:curStore();
+  rt.store=st.id;
+  setSheet(rt.kind==='app'?'App bewerten':'Filiale bewerten',`
+    <p class="sub" style="text-align:center">${rt.kind==='app'?'Wie gefällt Ihnen die Optik-Falkner-App?':appt?`Wie zufrieden waren Sie mit Ihrer ${esc(appt.type)} am ${fmtDate(appt.date)} in ${esc(st.name)}?`:`Wie zufrieden sind Sie mit ${esc(st.full)}?`}</p>
+    <div class="stars" id="rStars">${[1,2,3,4,5].map(n=>`<button aria-label="${n} Sterne" onclick="setStars(${n})">★</button>`).join('')}</div>
+    <p class="muted-s" style="text-align:center" id="rLabel">Bitte Sterne antippen</p>
+    <label class="f">${rt.kind==='app'?'Was können wir verbessern? (optional)':'Ihr Kommentar (optional)'}</label>
+    <textarea class="input" oninput="rt.text=this.value" placeholder="${rt.kind==='app'?'z. B. Funktion, die Ihnen fehlt':'z. B. Beratung, Wartezeit, Freundlichkeit'}"></textarea>
+    <button class="btn accent" id="rBtn" style="margin-top:18px" disabled onclick="submitRate()">Bewertung senden</button>`);
+}
+function setStars(n){rt.stars=n;document.querySelectorAll('#rStars button').forEach((b,i)=>b.classList.toggle('on',i<n));
+  document.getElementById('rLabel').textContent=['','Sehr unzufrieden','Unzufrieden','Okay','Zufrieden','Sehr zufrieden'][n];document.getElementById('rBtn').disabled=false}
+function submitRate(){
+  if(rt.kind==='app'){S.appReview={stars:rt.stars,text:rt.text,date:today()};persist();
+    successView('Danke für Ihr Feedback!','Ihre Bewertung hilft uns, die App weiter zu verbessern.');return}
+  S.reviews.push({store:rt.store,stars:rt.stars,text:rt.text,date:today(),appt:rt.appt});
+  if(rt.appt){const a=S.appts.find(x=>x.id===rt.appt);if(a)a.rated=true}
+  persist();
+  const st=STORES[rt.store];
+  if(rt.stars>=4) successView('Vielen Dank!','Schön, dass Sie zufrieden sind. Würden Sie uns auch auf Google bewerten? Das hilft anderen bei der Suche nach einem guten Optiker.',
+    `<a class="btn accent" style="margin-top:18px;text-decoration:none" href="${st.review}" target="_blank" rel="noopener">Auf Google bewerten</a>`);
+  else successView('Danke für Ihre Rückmeldung','Ihr Feedback geht direkt an die Filiale '+st.name+'. Wir melden uns bei Bedarf persönlich bei Ihnen.');
 }
 
 /* --- Kontaktlinsen nachbestellen --- */
 let qty=1, delivery='pickup';
 function sheetOrder(){
   qty=1;delivery='pickup';
-  const L=S.lenses;
+  const L=S.lenses, c=lensCols(), v=e=>c.map(x=>x[0]+' '+L[e][x[1]]).join(' · ');
   setSheet('Kontaktlinsen nachbestellen',`
     <div class="card" style="background:var(--surface-2);box-shadow:none">
-      <h3>${esc(L.product)}</h3>
-      <div class="muted-s">R: BC ${L.R.bc} · DIA ${L.R.dia} · Sph ${L.R.sph}<br>L: BC ${L.L.bc} · DIA ${L.L.dia} · Sph ${L.L.sph}</div>
+      <h3>${LENS_KIND[L.kind]}</h3><div class="muted-s">${esc(L.wear)}</div>
+      <div class="muted-s mt">R: ${v('R')}<br>L: ${v('L')}</div>
       <div class="muted-s mt">Werte aus Ihrem Kontaktlinsenpass</div>
     </div>
-    <label class="f">Menge (${esc(L.pack)} je Auge)</label>
+    <label class="f">Menge (${L.boxSize}er Box je Auge)</label>
     <div class="row"><div class="stepper"><button onclick="chQty(-1)">−</button><b id="qty">1</b><button onclick="chQty(1)">+</button></div><div class="grow muted-s" id="qtyInfo"></div></div>
     <label class="f">Lieferung</label>
     <div class="chips"><button class="chip on" onclick="pickChip(this);setDel('pickup')">Abholung in ${esc(curStore().name)} · gratis</button><button class="chip" onclick="pickChip(this);setDel('ship')">Versand nach Hause · € 4,90</button></div>
@@ -626,17 +816,17 @@ function setDel(d){delivery=d;updOrder()}
 function updOrder(){
   const L=S.lenses, sub=L.price*2*qty, sh=delivery==='ship'?4.9:0;
   document.getElementById('qty').textContent=qty;
-  document.getElementById('qtyInfo').textContent=`= ${2*qty} Boxen · reicht ca. ${qty*3} Monate`;
+  document.getElementById('qtyInfo').textContent=`= ${2*qty} Boxen · reicht ca. ${Math.round(qty*L.boxSize*L.daysPerLens/30)} Monate`;
   document.getElementById('sub').textContent=eur(sub);
   document.getElementById('ship').textContent=sh?eur(sh):'gratis';
   document.getElementById('tot').textContent=eur(sub+sh);
   document.getElementById('addrBox').innerHTML=delivery==='ship'?`<label class="f">Lieferadresse</label><input class="input" value="${esc(S.profile.addr)}">`:'';
 }
 function submitOrder(){
-  S.lenses.stockDays+=qty*90;
-  S.tickets.unshift({id:'t'+Date.now(),kind:'Bestellung',title:`${2*qty}× ${S.lenses.product}`,status:delivery==='ship'?'Versand vorbereitet':'Wird bereitgelegt',date:new Date().toISOString().slice(0,10)});
+  const st=lensStock(), add=qty*S.lenses.boxSize; setStock(st.R+add,st.L+add);
+  S.tickets.unshift({id:'t'+Date.now(),kind:'Bestellung',title:`${2*qty}× Kontaktlinsen (${LENS_KIND[S.lenses.kind].split(' ')[0]})`,status:delivery==='ship'?'Versand vorbereitet':'Wird bereitgelegt',date:today()});
   const Y=S.loyalty; Y.points++; let full=false;
-  if(Y.points>=Y.goal){Y.points=0;full=true;Y.vouchers.push({code:'FALK-'+String(Date.now()).slice(-4),date:new Date().toISOString().slice(0,10)})}
+  if(Y.points>=Y.goal){Y.points=0;full=true;Y.vouchers.push({code:'FALK-'+String(Date.now()).slice(-4),date:today()})}
   persist();
   const msg=delivery==='ship'?'Ihre Linsen werden in 2–3 Werktagen geliefert.':'Wir benachrichtigen Sie, sobald Ihre Linsen in der Filiale '+curStore().name+' abholbereit sind.';
   successView('Bestellung erhalten',msg+'<br><br>'+(full
@@ -693,8 +883,9 @@ function submitBook(){
 }
 
 render();
-// Beim ersten Start Filiale abfragen
+// Beim ersten Start Filiale abfragen, sonst ggf. Bewertungs-Push nach vergangenem Termin
 if(!S.store){setTimeout(()=>openSheet('store',true),400)}
+else {const pr=pendingReview(); if(pr) setTimeout(()=>showPush(pr),1200)}
 </script>
 </body>
 </html>
