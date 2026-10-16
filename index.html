@@ -397,7 +397,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.5 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.6 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -608,7 +608,7 @@ function renderLenses(){
 function redeem(code){S.loyalty.vouchers=S.loyalty.vouchers.filter(v=>v.code!==code);persist();render();toast('Gutschein eingelöst')}
 
 /* --- News --- */
-const visibleNews=()=>NEWS.filter(n=>n.store==='all'||n.store===curStore().id);
+const visibleNews=()=>[...(S.extraNews||[]),...NEWS].filter(n=>n.store==='all'||n.store===curStore().id);
 function renderNews(){
   const list=visibleNews(), unread=list.filter(n=>!S.newsRead.includes(n.id)).length, dot=document.getElementById('newsDot');
   dot.style.display=unread?'grid':'none'; dot.textContent=unread;
@@ -711,6 +711,20 @@ function demoPush(){
 }
 
 /* --- Chat --- */
+const dashAlive=()=>{try{return Date.now()-(+localStorage.getItem('falkner-dash-alive')||0)<15000}catch(e){return false}};
+// Live-Verbindung zum Dashboard (gleicher Browser): Änderungen sofort übernehmen
+window.addEventListener('storage',e=>{
+  if(e.key!=='falkner-v8'||!e.newValue)return;
+  let n;try{n=JSON.parse(e.newValue)}catch(x){return}
+  const before=new Set(S.chat.map(m=>m.id)); S=n;
+  const fresh=S.chat.filter(m=>!before.has(m.id)&&m.from!=='me');
+  if(chatOpen()&&fresh.length){S.chat.forEach(m=>m.read=true);persist()}
+  const inp=document.getElementById('chatInput'), keep=inp.value;
+  render(); inp.value=keep;
+  if(fresh.length){const m=fresh[fresh.length-1];
+    if(chatOpen())scrollChat(); else if(S.notif.chat) showPush((m.title?m.title+' – ':'')+m.text,()=>go('chat'))}
+});
+
 function scrollChat(){const mn=document.getElementById('main');mn.scrollTop=mn.scrollHeight;window.scrollTo(0,document.documentElement.scrollHeight)}
 const chatOpen=()=>document.getElementById('v-chat').classList.contains('active');
 const unreadChat=()=>S.chat.filter(m=>!m.read&&m.from!=='me').length;
@@ -751,6 +765,7 @@ function chatPhoto(inp){
   r.onload=e=>{addMsg({from:'me',text:'',img:e.target.result,read:true});autoReply('foto')}; r.readAsDataURL(f); inp.value='';
 }
 function autoReply(text){
+  if(dashAlive())return; // echtes Team antwortet über das Dashboard
   const st=curStore(), t=text.toLowerCase(), open=openStatus(st).o;
   let r='Danke für Ihre Nachricht! Wir kümmern uns darum und melden uns so schnell wie möglich.';
   if(t.includes('fertig')||t.includes('abhol')) r='Ihre Brille ist fertig und liegt zur Abholung bereit. Wir freuen uns auf Ihren Besuch!';
