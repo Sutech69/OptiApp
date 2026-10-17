@@ -213,6 +213,14 @@ nav.bottom button{position:relative}
 .nav-dot{position:absolute;top:4px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:99px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
 .num-in{width:72px;text-align:center;font-size:18px;font-weight:700;padding:8px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2)}
 
+/* Familie */
+.who{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:14px 0 2px}
+.who::-webkit-scrollbar{display:none}
+.who button{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:600;white-space:nowrap;border:2px solid transparent}
+.who button.on{border-color:var(--accent);color:var(--accent)}
+.wav{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13px;font-weight:700}
+.who button.on .wav{background:var(--accent);color:#fff}
+
 /* Chat */
 .head-btn{width:40px;height:40px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;position:relative;color:var(--ink)}
 .head-btn svg{width:20px;height:20px}
@@ -384,6 +392,8 @@ nav.bottom button.on{color:var(--brand)}
         <label class="f">Lieferadresse</label><input class="input" id="pAddr">
         <button class="btn mt" style="margin-top:16px" onclick="saveProfile()">Speichern</button>
       </div>
+      <h2>Familie</h2>
+      <div class="card" id="familyCard"></div>
       <h2>Stammfiliale</h2>
       <div class="card"><div class="row"><div class="grow"><b id="profStore"></b><div class="muted-s" id="profStoreAddr"></div></div><button class="btn ghost" style="width:auto;padding:10px 14px" onclick="openSheet('store')">Ändern</button></div></div>
       <h2>Benachrichtigungen</h2>
@@ -397,7 +407,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.6 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.7 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -467,6 +477,11 @@ const DEFAULT = {
   lenses:{kind:'sphärisch',wear:'Tageslinse',daysPerLens:1,boxSize:90,date:'2026-02-03',
     R:{bc:'8,5',dia:'14,3',sph:'-2,00',cyl:'–',ax:'–',add:'–'},L:{bc:'8,5',dia:'14,3',sph:'-2,25',cyl:'–',ax:'–',add:'–'},
     price:64.90,stock:{R:23,L:23,updated:addDays(0)}},
+  who:'me',
+  family:[{id:'k1',first:'Lena',last:'Karlinger',relation:'Tochter',birth:'2017',lenses:null,
+    glasses:[{id:'k1g1',date:'2026-07-08',note:'Myopie-Management-Gläser',
+      R:{sph:'-1,25',cyl:'–',ax:'–',add:'–'},L:{sph:'-1,50',cyl:'-0,25',ax:'170',add:'–'},pd:'28,0 / 28,5',
+      kasko:{until:'2028-07-08',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'}}]}],
   loyalty:{points:3,goal:5,reward:'Pflegemittel-Set gratis',vouchers:[]},
   appts:[{id:'a0',type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:'perg',rated:false},
          {id:'a1',type:'Kontaktlinsen-Kontrolle',date:workday(9),time:'10:30',store:'perg'}],
@@ -491,9 +506,9 @@ const LENS_KIND={'sphärisch':'Sphärische Kontaktlinsen','torisch':'Torische Ko
 const LENS_HINT={'sphärisch':'Korrigieren Kurz- oder Weitsichtigkeit','torisch':'Zusätzlich mit Hornhautverkrümmungs-Korrektur','multifokal':'Für Nähe und Ferne (Alterssichtigkeit)'};
 
 let S;
-try{S=JSON.parse(localStorage.getItem('falkner-v8'))}catch(e){}
+try{S=JSON.parse(localStorage.getItem('falkner-v9'))}catch(e){}
 if(!S) S=JSON.parse(JSON.stringify(DEFAULT));
-function persist(){try{localStorage.setItem('falkner-v8',JSON.stringify(S))}catch(e){}}
+function persist(){try{localStorage.setItem('falkner-v9',JSON.stringify(S))}catch(e){}}
 
 const fmtDate=(iso,opt={day:'2-digit',month:'2-digit',year:'numeric'})=>new Date(iso+'T12:00').toLocaleDateString('de-AT',opt);
 const eur=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
@@ -529,7 +544,14 @@ const ICON_GLASSES='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const ICON_LENS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 const stamps=(mini)=>{const Y=S.loyalty;let h='';for(let i=0;i<Y.goal;i++)h+=`<span class="stamp ${i<Y.points?'on':''}">${mini?'':CHECK}</span>`;return `<div class="stamps ${mini?'mini':''}">${h}</div>`};
-const latestGlasses=()=>[...S.glasses].sort((a,b)=>b.date.localeCompare(a.date))[0];
+const persons=()=>[{id:'me',first:S.profile.first,last:S.profile.last,relation:'Ich',glasses:S.glasses,lenses:S.lenses},...(S.family||[])];
+const curP=()=>persons().find(p=>p.id===S.who)||persons()[0];
+const allGlasses=()=>persons().flatMap(p=>p.glasses.map(g=>({g,p})));
+const findGlasses=id=>{const x=allGlasses().find(x=>x.g.id===id);return x?x.g:null};
+const ownerOf=id=>{const x=allGlasses().find(x=>x.g.id===id);return x?x.p:persons()[0]};
+const latestGlasses=()=>{const l=[...curP().glasses].sort((a,b)=>b.date.localeCompare(a.date))[0];return l||[...S.glasses].sort((a,b)=>b.date.localeCompare(a.date))[0]};
+function setWho(id){S.who=id;persist();render()}
+const whoBar=()=>(S.family&&S.family.length)?`<div class="who">${persons().map(p=>`<button class="${p.id===curP().id?'on':''}" onclick="setWho('${p.id}')"><span class="wav">${esc(p.first[0])}</span>${esc(p.first)}${p.id==='me'?'':' <span class="muted-s" style="font-weight:500">· '+esc(p.relation)+'</span>'}</button>`).join('')}</div>`:'';
 const upcoming=()=>S.appts.filter(x=>apptTime(x)>=new Date()).sort((a,b)=>apptTime(a)-apptTime(b));
 const pendingReview=()=>S.notif.review?S.appts.filter(x=>apptTime(x)<new Date()&&!x.rated).sort((a,b)=>apptTime(b)-apptTime(a))[0]:null;
 
@@ -541,7 +563,7 @@ function renderHome(){
   const next=upcoming()[0];
   document.getElementById('heroCard').innerHTML = next
     ? `<div class="label">Nächster Termin</div><div class="big">${fmtDate(next.date,{weekday:'long',day:'numeric',month:'long'})}</div>
-       <div class="meta">${next.time} Uhr · ${esc(next.type)} · ${esc((STORES[next.store]||curStore()).name)}</div><button class="btn-light" onclick="go('store')">Details ansehen</button>`
+       <div class="meta">${next.time} Uhr · ${esc(next.type)}${next.for?' für '+esc(next.for):''} · ${esc((STORES[next.store]||curStore()).name)}</div><button class="btn-light" onclick="go('store')">Details ansehen</button>`
     : `<div class="label">Kein Termin geplant</div><div class="big">Zeit für einen Sehtest?</div>
        <div class="meta">Wir empfehlen eine Kontrolle alle 12 Monate.</div><button class="btn-light" onclick="openSheet('book')">Jetzt buchen</button>`;
   const st=lensStock(), low=st.days<=30, g=latestGlasses(), V=S.loyalty.vouchers.length;
@@ -559,10 +581,10 @@ function rxTable(R,L,cols){
 }
 const kaskoActive=g=>g.kasko&&g.kasko.until>=today();
 function renderGlasses(){
-  const list=[...S.glasses].sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('glassesContent').innerHTML=list.map((g,i)=>`
-    <div class="card">
-      <div class="row"><div class="grow"><h3>Messung vom ${fmtDate(g.date)}</h3></div>${i===0?'<span class="badge ok">Aktuell</span>':''}</div>
+  const P=curP(), list=[...P.glasses].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('glassesContent').innerHTML=whoBar()+(list.length?'':`<div class="card mt"><b>Noch keine Messwerte für ${esc(P.first)}</b><p class="muted-s" style="margin-top:4px">Die Werte werden nach der nächsten Messung in der Filiale eingetragen.</p><button class="btn accent" style="margin-top:14px" onclick="openSheet('book')">Termin für ${esc(P.first)} buchen</button></div>`)+list.map((g,i)=>`
+    <div class="card mt">
+      <div class="row"><div class="grow"><h3>Messung vom ${fmtDate(g.date)}</h3>${g.note?`<div class="muted-s">${esc(g.note)}</div>`:''}</div>${i===0?'<span class="badge ok">Aktuell</span>':''}</div>
       ${rxTable(g.R,g.L,[['Sph','sph'],['Zyl','cyl'],['Achse','ax'],['Add','add']])}
       <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div>
         <div><span>Vollkasko</span><b style="color:${kaskoActive(g)?'var(--ok)':'var(--muted)'}">${g.kasko?(kaskoActive(g)?'bis '+fmtDate(g.kasko.until):'abgelaufen'):'keine'}</b></div></div>
@@ -578,9 +600,11 @@ function lensCols(){
   return c;
 }
 function renderLenses(){
+  if(curP().id!=='me'){const P=curP();
+    document.getElementById('lensesContent').innerHTML=whoBar()+(P.lenses?'':`<div class="card mt"><b>Für ${esc(P.first)} sind keine Kontaktlinsen hinterlegt</b><p class="muted-s" style="margin-top:4px">Sie interessieren sich für Kontaktlinsen${P.relation==='Tochter'||P.relation==='Sohn'?' oder Myopie-Management für Ihr Kind':''}? Wir beraten Sie gerne.</p><button class="btn accent" style="margin-top:14px" onclick="openSheet('book')">Beratungstermin buchen</button></div>`);return}
   const L=S.lenses, Y=S.loyalty, st=lensStock(), low=st.days<=30, left=Y.goal-Y.points;
-  document.getElementById('lensesContent').innerHTML=`
-    <div class="card">
+  document.getElementById('lensesContent').innerHTML=whoBar()+`
+    <div class="card mt">
       <div class="row"><div class="grow"><h3>${LENS_KIND[L.kind]}</h3><div class="muted-s">${esc(L.wear)} · ${LENS_HINT[L.kind]}</div></div><span class="badge ok">Aktiv</span></div>
       ${rxTable(L.R,L.L,lensCols())}
       <div class="kv"><div><span>Angepasst am</span><b>${fmtDate(L.date)}</b></div><div><span>Nächste Kontrolle</span><b>${fmtDate('2027-02-03')}</b></div></div>
@@ -649,7 +673,7 @@ function renderStore(){
     ${ap.length?ap.map(x=>`
     <div class="card"><div class="row">
       <div style="text-align:center;min-width:52px"><div class="muted-s" style="text-transform:uppercase">${fmtDate(x.date,{month:'short'})}</div><div style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1">${fmtDate(x.date,{day:'numeric'})}</div></div>
-      <div class="grow"><b>${esc(x.type)}</b><div class="muted-s">${fmtDate(x.date,{weekday:'long'})}, ${x.time} Uhr · Filiale ${esc((STORES[x.store]||st).name)}</div></div></div>
+      <div class="grow"><b>${esc(x.type)}${x.for?' · '+esc(x.for):''}</b><div class="muted-s">${fmtDate(x.date,{weekday:'long'})}, ${x.time} Uhr · Filiale ${esc((STORES[x.store]||st).name)}</div></div></div>
       <div class="btn-row"><button class="btn ghost" onclick="cancelAppt('${x.id}')">Stornieren</button><button class="btn ghost" onclick="toast('Zum Kalender hinzugefügt')">In Kalender</button></div>
     </div>`).join(''):'<div class="card"><p class="sub">Keine bevorstehenden Termine.</p></div>'}
     <h2>Meine Anfragen &amp; Bestellungen</h2>
@@ -674,6 +698,8 @@ function renderProfile(){
   ['First','Last','Mail','Phone','Addr'].forEach(k=>document.getElementById('p'+k).value=p[k.toLowerCase()]);
   const n=[['chat','Nachrichten der Filiale','z. B. „Brille abholbereit“'],['reminder','Kontaktlinsen-Erinnerung','Wenn Ihr Vorrat zur Neige geht'],['appt','Terminerinnerung','24 h vor Ihrem Termin'],['review','Bewertung nach Termin','Kurze Frage, wie Ihr Besuch war'],['repair','Reparatur-Status','Wenn Ihre Brille abholbereit ist'],['offers','Angebote & News','Neuigkeiten Ihrer Filiale']];
   document.getElementById('notifCard').innerHTML=n.map(x=>`<div class="list-item"><div class="grow"><b>${x[1]}</b><div class="muted-s">${x[2]}</div></div><button class="toggle ${S.notif[x[0]]?'on':''}" onclick="toggleNotif('${x[0]}')" aria-label="${x[1]}"></button></div>`).join('');
+  document.getElementById('familyCard').innerHTML=`<p class="muted-s" style="margin-bottom:6px">Verwalten Sie Brillen- und Kontaktlinsenpass Ihrer Kinder in Ihrer App.</p>`+(S.family||[]).map(k=>`<div class="list-item"><span class="wav" style="width:36px;height:36px">${esc(k.first[0])}</span><div class="grow"><b>${esc(k.first)} ${esc(k.last)}</b><div class="muted-s">${esc(k.relation)}${k.birth?' · Jg. '+esc(k.birth):''} · ${k.glasses.length?'Brillenpass vorhanden':'noch keine Messwerte'}</div></div><button class="btn ghost" style="width:auto;padding:8px 12px" onclick="setWho('${k.id}');go('glasses')">Ansehen</button></div>`).join('')+
+    `<button class="btn ghost" style="margin-top:12px" onclick="openSheet('family')">+ Familienmitglied hinzufügen</button>`;
   const ar=S.appReview;
   document.getElementById('appRateCard').innerHTML=`<button class="list-item" style="width:100%;text-align:left" onclick="openSheet('rate',{kind:'app'})"><span class="aic" style="background:var(--warn-soft);font-size:18px">⭐</span><div class="grow"><b>App bewerten</b><div class="muted-s">${ar?'Ihre Bewertung: <span class="stars-s">'+starStr(ar.stars)+'</span>':'Wie gefällt Ihnen die App?'}</div></div><span class="chev">›</span></button>`;
 }
@@ -687,8 +713,8 @@ function saveProfile(){
 function cancelAppt(id){if(confirm('Termin wirklich stornieren?')){S.appts=S.appts.filter(a=>a.id!==id);persist();render();toast('Termin storniert')}}
 function resetDemo(){if(confirm('Alle Demo-Daten zurücksetzen?')){S=JSON.parse(JSON.stringify(DEFAULT));S.store='perg';persist();render();toast('Zurückgesetzt')}}
 function sharePass(id){
-  const g=S.glasses.find(x=>x.id===id);
-  const txt=`Brillenpass – Messung vom ${fmtDate(g.date)}\nR: Sph ${g.R.sph} Zyl ${g.R.cyl} A ${g.R.ax} Add ${g.R.add}\nL: Sph ${g.L.sph} Zyl ${g.L.cyl} A ${g.L.ax} Add ${g.L.add}\nPD ${g.pd} mm`;
+  const g=findGlasses(id);
+  const txt=`Brillenpass ${ownerOf(g.id).first} ${ownerOf(g.id).last} – Messung vom ${fmtDate(g.date)}\nR: Sph ${g.R.sph} Zyl ${g.R.cyl} A ${g.R.ax} Add ${g.R.add}\nL: Sph ${g.L.sph} Zyl ${g.L.cyl} A ${g.L.ax} Add ${g.L.add}\nPD ${g.pd} mm`;
   if(navigator.share) navigator.share({title:'Brillenpass',text:txt}).catch(()=>{});
   else {try{navigator.clipboard.writeText(txt);toast('In Zwischenablage kopiert')}catch(e){toast('Teilen nicht verfügbar')}}
 }
@@ -714,7 +740,7 @@ function demoPush(){
 const dashAlive=()=>{try{return Date.now()-(+localStorage.getItem('falkner-dash-alive')||0)<15000}catch(e){return false}};
 // Live-Verbindung zum Dashboard (gleicher Browser): Änderungen sofort übernehmen
 window.addEventListener('storage',e=>{
-  if(e.key!=='falkner-v8'||!e.newValue)return;
+  if(e.key!=='falkner-v9'||!e.newValue)return;
   let n;try{n=JSON.parse(e.newValue)}catch(x){return}
   const before=new Set(S.chat.map(m=>m.id)); S=n;
   const fresh=S.chat.filter(m=>!before.has(m.id)&&m.from!=='me');
@@ -781,7 +807,7 @@ function autoReply(text){
 /* ===================== Bottom Sheets ===================== */
 const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
 function openSheet(kind,arg){
-  ({damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate})[kind](arg);
+  ({family:sheetFamily,damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate})[kind](arg);
   sheet.classList.add('on');scrim.classList.add('on');
 }
 function closeSheet(){sheet.classList.remove('on');scrim.classList.remove('on')}
@@ -809,7 +835,7 @@ let dmg={};
 const howOpts=()=>['In Filiale '+curStore().name+' vorbeibringen','Rückruf erwünscht'];
 function sheetDamage(gid){dmg={gid:gid||latestGlasses().id,kasko:false,type:DMG_TYPES[0],text:'',photos:[],how:0};renderDamageForm()}
 function sheetKasko(gid){
-  const g=S.glasses.find(x=>x.id===gid)||latestGlasses();
+  const g=findGlasses(gid)||latestGlasses();
   if(!kaskoActive(g)){
     setSheet('Vollkasko',`
       <div class="kasko-box off"><b>Für diese Brille besteht derzeit keine aktive Vollkasko.</b>
@@ -824,12 +850,12 @@ function sheetKasko(gid){
 function kaskoBox(g){return `<div class="kasko-box"><b>✓ Vollkasko aktiv bis ${fmtDate(g.kasko.until)}</b>
   <div class="muted-s" style="margin-top:4px">Gedeckt: ${esc(g.kasko.cover)}<br>Selbstbehalt: ${esc(g.kasko.deductible)}</div></div>`}
 function renderDamageForm(){
-  const g=S.glasses.find(x=>x.id===dmg.gid);
+  const g=findGlasses(dmg.gid);
   setSheet(dmg.kasko?'Vollkasko nutzen':'Schaden melden',`
-    ${dmg.kasko?kaskoBox(g)+`<label class="f">Versicherte Brille</label><div class="input">Brille – Messung vom ${fmtDate(g.date)}</div>`
+    ${dmg.kasko?kaskoBox(g)+`<label class="f">Versicherte Brille</label><div class="input">${esc(ownerOf(g.id).first)} – Brille vom ${fmtDate(g.date)}</div>`
       :`<p class="sub">Beschreiben Sie kurz den Schaden – wir melden uns innerhalb von 24 h.</p>
     <label class="f">Betroffene Brille</label>
-    <select class="input" id="dGlass" onchange="dmg.gid=this.value">${S.glasses.map(x=>`<option value="${x.id}" ${x.id===dmg.gid?'selected':''}>Brille – Messung vom ${fmtDate(x.date)}</option>`).join('')}</select>`}
+    <select class="input" id="dGlass" onchange="dmg.gid=this.value">${allGlasses().map(({g:x,p})=>`<option value="${x.id}" ${x.id===dmg.gid?'selected':''}>${esc(p.first)} – Brille vom ${fmtDate(x.date)}</option>`).join('')}</select>`}
     <label class="f">Art des Schadens</label>
     <div class="chips" id="dType">${DMG_TYPES.map(t=>`<button class="chip ${t===dmg.type?'on':''}" onclick="pickChip(this);dmg.type='${t}'">${t}</button>`).join('')}</div>
     <label class="f">Beschreibung</label>
@@ -845,13 +871,13 @@ function previewImgs(inp){
   [...inp.files].slice(0,4-dmg.photos.length).forEach(f=>{const r=new FileReader();r.onload=e=>{dmg.photos.push(e.target.result);document.getElementById('thumbs').innerHTML=dmg.photos.map(src=>`<img src="${src}">`).join('')};r.readAsDataURL(f)});
 }
 function damageSummary(){
-  const g=S.glasses.find(x=>x.id===dmg.gid);
+  const g=findGlasses(dmg.gid);
   setSheet('Bitte Angaben prüfen',`
     <p class="sub">Stimmt alles? Erst nach „Verbindlich absenden“ geht die Meldung an die Filiale.</p>
     <div class="card" style="background:var(--surface-2);box-shadow:none;margin-top:14px">
       <div class="sum">
         <span>Art</span><b>${dmg.kasko?'Vollkasko-Fall':'Schadensmeldung'}</b>
-        <span>Brille</span><b>Messung vom ${fmtDate(g.date)}</b>
+        <span>Brille</span><b>${esc(ownerOf(g.id).first)} – Messung vom ${fmtDate(g.date)}</b>
         <span>Schaden</span><b>${esc(dmg.type)}</b>
         <span>Beschreibung</span><b>${dmg.text.trim()?esc(dmg.text.trim()):'–'}</b>
         <span>Fotos</span><b>${dmg.photos.length?dmg.photos.length+' Foto'+(dmg.photos.length>1?'s':''):'keine'}</b>
@@ -865,11 +891,30 @@ function damageSummary(){
     <button class="btn ghost" style="margin-top:10px" onclick="renderDamageForm()">Angaben bearbeiten</button>`);
 }
 function submitDamage(){
-  const g=S.glasses.find(x=>x.id===dmg.gid), nr=(dmg.kasko?'KF-':'SM-')+String(Date.now()).slice(-5);
-  S.tickets.unshift({id:'t'+Date.now(),kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+' – Brille vom '+fmtDate(g.date),status:'In Prüfung',date:today()});
+  const g=findGlasses(dmg.gid), nr=(dmg.kasko?'KF-':'SM-')+String(Date.now()).slice(-5);
+  S.tickets.unshift({id:'t'+Date.now(),kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+' – '+(ownerOf(g.id).id==='me'?'':ownerOf(g.id).first+'s ')+'Brille vom '+fmtDate(g.date),status:'In Prüfung',date:today()});
   persist();
   setTimeout(()=>addMsg({from:'status',icon:'📨',title:(dmg.kasko?'Kasko-Fall ':'Schadensmeldung ')+nr+' eingegangen',text:'Wir prüfen Ihre Angaben und melden uns hier im Chat.',action:['Antworten',"go('chat')"]},false),0);
   successView(dmg.kasko?'Kasko-Fall gemeldet':'Meldung gesendet','Vorgangsnr. '+nr+'. Die Filiale '+curStore().name+' prüft '+(dmg.kasko?'den Kasko-Fall':'den Schaden')+' und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
+}
+
+/* --- Familienmitglied --- */
+function sheetFamily(){
+  setSheet('Familienmitglied hinzufügen',`
+    <p class="sub">Fügen Sie z. B. Ihr Kind hinzu. Die Messwerte trägt Ihre Filiale nach der Messung ein – danach sehen Sie den Brillenpass direkt hier in der App.</p>
+    <label class="f">Vorname</label><input class="input" id="fFirst">
+    <label class="f">Nachname</label><input class="input" id="fLast" value="${esc(S.profile.last)}">
+    <label class="f">Geburtsjahr</label><input class="input" id="fBirth" inputmode="numeric" placeholder="z. B. 2015">
+    <label class="f">Beziehung</label><div class="chips" id="fRel">${['Tochter','Sohn','Partner/in','Sonstige'].map((r,i)=>`<button class="chip ${i===0?'on':''}" onclick="pickChip(this)">${r}</button>`).join('')}</div>
+    <p class="muted-s" style="margin-top:14px">Sie bestätigen, dass Sie erziehungsberechtigt bzw. von der Person berechtigt sind, ihre Daten einzusehen.</p>
+    <button class="btn accent" style="margin-top:14px" onclick="saveFamily()">Hinzufügen</button>`);
+}
+function saveFamily(){
+  const first=document.getElementById('fFirst').value.trim(); if(!first){toast('Bitte Vornamen eingeben');return}
+  const m={id:'k'+Date.now(),first,last:document.getElementById('fLast').value.trim(),birth:document.getElementById('fBirth').value.trim(),relation:document.querySelector('#fRel .chip.on').textContent,glasses:[],lenses:null};
+  S.family=S.family||[];S.family.push(m);persist();
+  setTimeout(()=>addMsg({from:'status',icon:'👨‍👧',title:'Familienmitglied hinzugefügt',text:`${first} wurde mit Ihrem Konto verknüpft. Wir tragen die Messwerte beim nächsten Besuch in der Filiale ein.`,action:['Termin buchen',"openSheet('book')"]},false),0);
+  successView('Hinzugefügt',`${esc(first)} ist jetzt mit Ihrem Konto verknüpft. Oben im Brillen- und Kontaktlinsenpass können Sie zwischen den Personen wechseln.`);
 }
 
 /* --- Vorrat bearbeiten --- */
@@ -973,10 +1018,11 @@ function submitOrder(){
 /* --- Termin buchen --- */
 let bk={};
 function sheetBook(){
-  bk={store:curStore().id,type:null,day:null,time:null};
+  bk={store:curStore().id,type:null,day:null,time:null,who:curP().id};
   const types=[['Augenkontrolle','3D-Messung, Augenmuskeln, Nachtsicht · 30 Min'],['Brillenglasberatung','45 Min'],['Kontaktlinsen-Anpassung','60 Min'],['Kontaktlinsen-Kontrolle','20 Min'],['Reparatur / Anpassung','15 Min']];
   setSheet('Termin buchen',`
-    <label class="f" style="margin-top:0">1. Filiale</label>
+    ${S.family&&S.family.length?`<label class="f" style="margin-top:0">Für wen?</label><div class="chips" id="bWho">${persons().map(p=>`<button class="chip ${p.id===bk.who?'on':''}" onclick="pickChip(this);bk.who='${p.id}'">${esc(p.first)}</button>`).join('')}</div>`:''}
+    <label class="f" ${S.family&&S.family.length?'':'style="margin-top:0"'}>1. Filiale</label>
     <div id="bStore">${storeOpts(bk.store,'selStore')}</div>
     <label class="f">2. Leistung</label>
     <div id="bType">${types.map(t=>`<button class="list-item" style="width:100%;text-align:left" onclick="selType(this,'${t[0]}')"><div class="grow"><b>${t[0]}</b><div class="muted-s">${t[1]}</div></div><span class="badge info" style="visibility:hidden">✓</span></button>`).join('')}</div>
@@ -1013,10 +1059,11 @@ function selDay(el){
 function selSlot(el,s){document.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));el.classList.add('on');bk.time=s;chkBook()}
 function chkBook(){document.getElementById('bBtn').disabled=!(bk.store&&bk.type&&bk.day&&bk.time)}
 function submitBook(){
-  S.appts.push({id:'a'+Date.now(),type:bk.type,date:bk.day,time:bk.time,store:bk.store});
+  const wp=persons().find(p=>p.id===bk.who), forName=wp&&wp.id!=='me'?wp.first:'';
+  S.appts.push({id:'a'+Date.now(),type:bk.type,date:bk.day,time:bk.time,store:bk.store,for:forName||undefined});
   persist();
-  setTimeout(()=>addMsg({from:'status',icon:'📅',title:'Termin bestätigt',text:`${bk.type} am ${fmtDate(bk.day,{weekday:'long',day:'numeric',month:'long'})} um ${bk.time} Uhr in ${STORES[bk.store].name}.`,store:bk.store},false),0);
-  successView('Termin gebucht',`${esc(bk.type)} am ${fmtDate(bk.day,{weekday:'long',day:'numeric',month:'long'})} um ${bk.time} Uhr in der Filiale ${STORES[bk.store].name}. Wir freuen uns auf Sie!`);
+  setTimeout(()=>addMsg({from:'status',icon:'📅',title:'Termin bestätigt',text:`${bk.type}${forName?' für '+forName:''} am ${fmtDate(bk.day,{weekday:'long',day:'numeric',month:'long'})} um ${bk.time} Uhr in ${STORES[bk.store].name}.`,store:bk.store},false),0);
+  successView('Termin gebucht',`${esc(bk.type)}${forName?' für '+esc(forName):''} am ${fmtDate(bk.day,{weekday:'long',day:'numeric',month:'long'})} um ${bk.time} Uhr in der Filiale ${STORES[bk.store].name}. Wir freuen uns auf Sie!`);
 }
 
 render();
