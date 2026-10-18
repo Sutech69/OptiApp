@@ -451,12 +451,13 @@ nav.bottom button.on{color:var(--brand)}
       <div class="card" id="appRateCard"></div>
       <h2>Datenschutz</h2>
       <div class="card">
-        <div class="list-item"><div class="grow">Datenschutzerklärung</div><span class="chev">›</span></div>
+        <button class="list-item" style="width:100%;text-align:left" onclick="openSheet('legal','privacy')"><div class="grow">Datenschutzerklärung</div><span class="chev">›</span></button>
+        <button class="list-item" style="width:100%;text-align:left" onclick="openSheet('legal','imprint')"><div class="grow">Impressum</div><span class="chev">›</span></button>
         <div class="list-item"><div class="grow">Meine Daten exportieren</div><span class="chev">›</span></div>
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.0 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.1 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -696,8 +697,8 @@ function renderGlasses(){
       <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div>
         ${i===0&&checkupDue(P)?`<div><span>Nächster Sehtest</span><b>ab ${fmtDate(checkupDue(P).date)}</b></div>`:''}
         <div><span>Vollkasko</span><b style="color:${kaskoActive(g)?'var(--ok)':'var(--muted)'}">${g.kasko?(kaskoActive(g)?'bis '+fmtDate(kaskoInfo(g).until):'abgelaufen'):'keine'}</b></div></div>
-      <div class="btn-row"><button class="btn ghost" onclick="openSheet('damage','${g.id}')">Schaden melden</button><button class="btn ghost" onclick="sharePass('${g.id}')">Teilen</button></div>
-      <button class="btn outline" onclick="openSheet('kasko','${g.id}')">Vollkasko nutzen</button>
+      <div class="btn-row"><button class="btn ghost" onclick="openSheet('damage','${g.id}')">Schaden melden</button><button class="btn ghost" onclick="sharePass('${g.id}')">Als PDF teilen</button></div>
+      ${kaskoActive(g)?`<button class="btn outline" onclick="openSheet('kasko','${g.id}')">Vollkasko nutzen</button>`:''}
       <button class="btn ghost" style="margin-top:10px" onclick="openSheet('docs','${g.id}')">📄 Dokumente${g.purchase?' ('+(g.kasko?3:2)+')':''}</button>
     </div>`).join('');
 }
@@ -832,11 +833,60 @@ function saveProfile(){
 }
 function cancelAppt(id){if(confirm('Termin wirklich stornieren?')){S.appts=S.appts.filter(a=>a.id!==id);persist();render();toast('Termin storniert')}}
 function resetDemo(){if(confirm('Alle Demo-Daten zurücksetzen? Die App startet danach wie beim ersten Öffnen.')){try{localStorage.removeItem('falkner-v10')}catch(e){};location.href=location.pathname}}
+// Brillenpass als echte PDF-Datei (ohne externe Bibliothek)
+const PDF_MAP={'€':128,'‚':130,'„':132,'…':133,'–':150,'—':151,'“':147,'”':148,'‘':145,'’':146};
+const pdfTxt=t=>[...String(t)].map(ch=>{const c=PDF_MAP[ch]||ch.charCodeAt(0);return c<256?String.fromCharCode(c):'?'}).join('').replace(/[\\()]/g,m=>'\\'+m);
+function buildPassPdf(g){
+  const o=ownerOf(g.id), st=curStore(), W=595, ops=[];
+  const T=(x,y,size,txt,bold,gray)=>ops.push(`BT /${bold?'F2':'F1'} ${size} Tf ${gray?'0.42 0.42 0.42':'0.1 0.1 0.1'} rg ${x} ${y} Td (${pdfTxt(txt)}) Tj ET`);
+  const L=(x1,y1,x2,y2)=>ops.push(`0.8 0.8 0.8 RG 0.8 w ${x1} ${y1} m ${x2} ${y2} l S`);
+  ops.push('0.78 0.09 0.13 rg 0 800 595 42 re f');
+  ops.push('BT /F2 18 Tf 1 1 1 rg 50 815 Td (FALKNER) Tj ET','BT /F1 10 Tf 1 1 1 rg 150 817 Td ('+pdfTxt('Optik · Sehzentrum')+') Tj ET');
+  T(50,755,22,'Brillenpass',1); T(50,733,11,o.first+' '+o.last+'  ·  Messung vom '+fmtDate(g.date),0,1);
+  const cols=[['Sph','sph'],['Zyl','cyl'],['Achse','ax'],['Add','add']], x0=50, cw=95; let y=690;
+  T(x0,y,10,'Auge',1,1); cols.forEach(([h],i)=>T(x0+80+i*cw,y,10,h,1,1)); L(50,y-8,545,y-8);
+  [['Rechts','R'],['Links','L']].forEach(([n,e],r)=>{const yy=y-30-r*28;T(x0,yy,12,n,1);cols.forEach(([,f],i)=>T(x0+80+i*cw,yy,12,g[e][f]||'–'));L(50,yy-10,545,yy-10)});
+  y=595; T(50,y,10,'Pupillendistanz (R/L)',0,1); T(220,y,12,g.pd+' mm',1);
+  const k=kaskoInfo(g); y-=22; T(50,y,10,'Vollkasko',0,1); T(220,y,12,k?(k.active?'aktiv bis '+fmtDate(k.until):'abgelaufen'):'keine',1);
+  y-=22; T(50,y,10,'Ausgestellt',0,1); T(220,y,12,fmtDate(today()),1);
+  L(50,520,545,520); T(50,500,11,st.full,1); T(50,484,10,st.street+', '+st.zip+'  ·  Tel. '+st.tel+'  ·  '+st.mail,0,1);
+  T(50,60,8,'Die Werte entsprechen der Messung vom '+fmtDate(g.date)+'. Für Kontaktlinsen gelten eigene Werte. Erstellt mit der Optik-Falkner-App.',0,1);
+  const stream=ops.join('\n');
+  const objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`];
+  let out='%PDF-1.4\n%\xE2\xE3\xCF\xD3\n', offs=[];
+  objs.forEach((ob,i)=>{offs.push(out.length);out+=`${i+1} 0 obj\n${ob}\nendobj\n`});
+  const xref=out.length; out+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+offs.map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Uint8Array.from(out,c=>c.charCodeAt(0));
+}
 function sharePass(id){
-  const g=findGlasses(id);
-  const txt=`Brillenpass ${ownerOf(g.id).first} ${ownerOf(g.id).last} – Messung vom ${fmtDate(g.date)}\nR: Sph ${g.R.sph} Zyl ${g.R.cyl} A ${g.R.ax} Add ${g.R.add}\nL: Sph ${g.L.sph} Zyl ${g.L.cyl} A ${g.L.ax} Add ${g.L.add}\nPD ${g.pd} mm`;
-  if(navigator.share) navigator.share({title:'Brillenpass',text:txt}).catch(()=>{});
-  else {try{navigator.clipboard.writeText(txt);toast('In Zwischenablage kopiert')}catch(e){toast('Teilen nicht verfügbar')}}
+  const g=findGlasses(id), o=ownerOf(g.id), name=`Brillenpass_${o.first}_${g.date}.pdf`;
+  const file=new File([buildPassPdf(g)],name,{type:'application/pdf'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})) navigator.share({files:[file],title:'Brillenpass'}).catch(()=>{});
+  else {const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Brillenpass als PDF gespeichert')}
+}
+/* --- Datenschutz & Impressum (Platzhalter in [eckigen Klammern] vor Veröffentlichung ausfüllen) --- */
+function sheetLegal(kind){
+  const P=STORES.perg, D2=STORES.dimbach, ph=t=>`<span style="background:var(--warn-bg,#fff3cd);padding:0 4px;border-radius:4px">[${t}]</span>`;
+  const sec=(h,b)=>`<h3 style="margin-top:18px">${h}</h3><p class="sub" style="margin-top:4px">${b}</p>`;
+  if(kind==='imprint') setSheet('Impressum',`<p class="muted-s">Angaben gemäß § 5 ECG und § 25 MedienG</p>
+    ${sec('Medieninhaber & Betreiber',`${ph('Firmenwortlaut, Rechtsform')}<br>${P.street}, ${P.zip}<br>Tel. ${P.tel} · ${P.mail}`)}
+    ${sec('Filialen',`${P.full}, ${P.street}, ${P.zip}<br>${D2.full}, ${D2.street}, ${D2.zip}`)}
+    ${sec('Unternehmensdaten',`Geschäftsführung: ${ph('Name')}<br>UID-Nr.: ${ph('ATU…')}<br>Firmenbuch: ${ph('FN …, Landesgericht …')}`)}
+    ${sec('Gewerbe & Aufsicht',`Gewerbe: Augenoptik (reglementiertes Gewerbe)<br>Mitglied der Wirtschaftskammer Oberösterreich, Landesinnung der Gesundheitsberufe<br>Gewerbebehörde: Bezirkshauptmannschaft Perg<br>Berufsrecht: Gewerbeordnung, abrufbar unter ris.bka.gv.at`)}
+    ${sec('Online-Streitbeilegung','Verbraucher können Beschwerden an die OS-Plattform der EU richten: ec.europa.eu/consumers/odr')}
+    <p class="muted-s" style="margin-top:18px">Prototyp: Felder in [Klammern] vor der Veröffentlichung ausfüllen.</p>`);
+  else setSheet('Datenschutz',`<p class="muted-s">Stand: ${fmtDate(today())}</p>
+    ${sec('Verantwortlicher',`${ph('Firmenwortlaut')}, ${P.street}, ${P.zip} · ${P.mail}`)}
+    ${sec('Welche Daten wir verarbeiten','Stammdaten (Name, Kundennummer, Kontakt), Mess- und Sehwerte, Kontaktlinsendaten, Termine, Aufträge, Schadensmeldungen mit Fotos sowie Nachrichten an die Filiale.')}
+    ${sec('Gesundheitsdaten','Sehwerte sind Gesundheitsdaten (Art. 9 DSGVO). Wir verarbeiten sie nur mit Ihrer ausdrücklichen Einwilligung, die Sie beim Erststart erteilt haben und jederzeit widerrufen können.')}
+    ${sec('Zweck & Rechtsgrundlage','Durchführung Ihrer Aufträge und Termine (Vertrag, Art. 6 Abs. 1 lit. b), Erinnerungen und Benachrichtigungen (Einwilligung, Art. 6 Abs. 1 lit. a), gesetzliche Aufbewahrungspflichten (Art. 6 Abs. 1 lit. c).')}
+    ${sec('Speicherort & Empfänger',`Daten werden ${ph('Anbieter, Serverstandort EU')} gespeichert. Eine Weitergabe erfolgt nur, wenn nötig – z. B. an die Versicherung im Vollkasko-Fall.`)}
+    ${sec('Speicherdauer','Solange Sie Kunde sind bzw. die App nutzen, darüber hinaus nur im Rahmen gesetzlicher Aufbewahrungsfristen (z. B. 7 Jahre für Rechnungen).')}
+    ${sec('Ihre Rechte','Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch und Widerruf Ihrer Einwilligung. Beschwerden richten Sie an die Österreichische Datenschutzbehörde (dsb.gv.at).')}
+    <p class="muted-s" style="margin-top:18px">Prototyp: Mustertext – vor Veröffentlichung rechtlich prüfen lassen.</p>`);
 }
 let toastT;
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
@@ -927,7 +977,7 @@ function autoReply(text){
 /* ===================== Bottom Sheets ===================== */
 const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
 function openSheet(kind,arg){
-  ({news:sheetNews,docs:sheetDocs,onbStore:sheetStore,family:sheetFamily,damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate})[kind](arg);
+  ({news:sheetNews,docs:sheetDocs,onbStore:sheetStore,family:sheetFamily,damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate,legal:sheetLegal})[kind](arg);
   sheet.classList.add('on');scrim.classList.add('on');
 }
 function closeSheet(){sheet.classList.remove('on');scrim.classList.remove('on')}
@@ -974,7 +1024,7 @@ function sheetKasko(gid){
 }
 function kaskoBox(g){const k=kaskoInfo(g);return `<div class="kasko-box"><b>✓ Vollkasko aktiv bis ${fmtDate(k.until)}</b>
   <div class="muted-s" style="margin-top:4px">Gedeckt: ${esc(k.cover)}<br>Selbstbehalt: ${esc(k.ded)}</div></div>`}
-function setDmg(k,v){dmg[k]=v;dmg.err='';if(k==='type'){if(!needsSide(v))dmg.side=null;if(!needsPart(v))dmg.part=null;if(!dmg.viaKasko)dmg.kasko=null}if(k==='gid'&&!dmg.viaKasko)dmg.kasko=null;renderDamageForm()}
+function setDmg(k,v){if(k==='quote')v=v.startsWith('Ja');dmg[k]=v;dmg.err='';if(k==='type'){if(!needsSide(v))dmg.side=null;if(!needsPart(v))dmg.part=null;if(!dmg.viaKasko)dmg.kasko=null}if(k==='gid'&&!dmg.viaKasko)dmg.kasko=null;renderDamageForm()}
 function renderDamageForm(){
   const g=findGlasses(dmg.gid), k=kaskoInfo(g), sc=document.getElementById('sheetBody').scrollTop;
   if(!askKasko()&&!dmg.viaKasko) dmg.kasko=false;
@@ -992,6 +1042,7 @@ function renderDamageForm(){
       <div class="muted-s" style="margin-top:4px">Ihre Brille ist bis ${fmtDate(k.until)} versichert (${esc(k.cover)}). Selbstbehalt: ${esc(k.ded)}.</div>
       <div class="chips" style="margin-top:10px"><button class="chip ${dmg.kasko===true?'on':''}" onclick="setDmg('kasko',true)">Ja, Vollkasko nutzen</button><button class="chip ${dmg.kasko===false?'on':''}" onclick="setDmg('kasko',false)">Nein</button></div></div>`
       :(!dmg.viaKasko&&k&&k.active&&k.glassOnly&&!isGlassDmg(dmg.type)?`<p class="muted-s" style="margin-top:12px">ℹ️ Die Vollkasko dieser Brille deckt nur Brillengläser.</p>`:'')}
+    <label class="f">Kostenvoranschlag vorab gewünscht? *</label>${chips(['Ja, bitte vorab','Nein, direkt reparieren'],dmg.quote===true?'Ja, bitte vorab':dmg.quote===false?'Nein, direkt reparieren':null,'quote')}
     <label class="f">Beschreibung</label>
     <textarea class="input" id="dText" oninput="dmg.text=this.value" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht.">${esc(dmg.text)}</textarea>
     <label class="f">Fotos (optional)</label>
@@ -1010,7 +1061,7 @@ function previewImgs(inp){
 }
 function damageSummary(){
   const g=findGlasses(dmg.gid);
-  const miss=needsSide(dmg.type)&&!dmg.side?'Bitte wählen Sie die Seite (Rechts, Links oder Beides).':needsPart(dmg.type)&&!dmg.part?'Bitte wählen Sie den Bereich (Mittelteil, Bügel oder Beides).':(!dmg.viaKasko&&askKasko()&&dmg.kasko===null)?'Bitte geben Sie an, ob die Vollkasko greifen soll.':'';
+  const miss=needsSide(dmg.type)&&!dmg.side?'Bitte wählen Sie die Seite (Rechts, Links oder Beides).':needsPart(dmg.type)&&!dmg.part?'Bitte wählen Sie den Bereich (Mittelteil, Bügel oder Beides).':(!dmg.viaKasko&&askKasko()&&dmg.kasko===null)?'Bitte geben Sie an, ob die Vollkasko greifen soll.':(dmg.quote===undefined||dmg.quote===null)?'Bitte wählen Sie, ob Sie vorab einen Kostenvoranschlag möchten.':'';
   if(miss){dmg.err=miss;renderDamageForm();document.getElementById('sheetBody').scrollTop=1e5;return}
   setSheet('Bitte Angaben prüfen',`
     <p class="sub">Stimmt alles? Erst nach „Verbindlich absenden“ geht die Meldung an die Filiale.</p>
@@ -1019,6 +1070,7 @@ function damageSummary(){
         <span>Art</span><b>${dmg.kasko?'Vollkasko-Fall':'Schadensmeldung'}</b>
         <span>Brille</span><b>${esc(ownerOf(g.id).first)} – Messung vom ${fmtDate(g.date)}</b>
         <span>Schaden</span><b>${esc(dmg.type)}</b>
+        <span>Kostenvoranschlag</span><b>${dmg.quote?'Ja, vorab':'Nein'}</b>
         ${dmg.side?`<span>Seite</span><b>${esc(dmg.side)}</b>`:''}${dmg.part?`<span>Bereich</span><b>${esc(dmg.part)}</b>`:''}
         ${kaskoInfo(g)&&kaskoInfo(g).active?`<span>Vollkasko</span><b>${dmg.kasko?'Ja':'Nein'}</b>`:''}
         <span>Beschreibung</span><b>${dmg.text.trim()?esc(dmg.text.trim()):'–'}</b>
@@ -1034,7 +1086,7 @@ function damageSummary(){
 }
 function submitDamage(){
   const g=findGlasses(dmg.gid), nr=(dmg.kasko?'KF-':'SM-')+String(Date.now()).slice(-5);
-  S.tickets.unshift({id:'t'+Date.now(),nr,photos:dmg.photos.slice(),desc:dmg.text.trim(),how:howOpts()[dmg.how],damage:dmg.type,side:dmg.side||undefined,part:dmg.part||undefined,kasko:!!dmg.kasko,kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+(dmg.side?' ('+dmg.side+')':dmg.part?' ('+dmg.part+')':'')+' – '+(ownerOf(g.id).id==='me'?'':ownerOf(g.id).first+'s ')+'Brille vom '+fmtDate(g.date),status:'Offen',date:today()});
+  S.tickets.unshift({id:'t'+Date.now(),nr,photos:dmg.photos.slice(),desc:dmg.text.trim(),how:howOpts()[dmg.how],damage:dmg.type,side:dmg.side||undefined,quote:!!dmg.quote,part:dmg.part||undefined,kasko:!!dmg.kasko,kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+(dmg.side?' ('+dmg.side+')':dmg.part?' ('+dmg.part+')':'')+' – '+(ownerOf(g.id).id==='me'?'':ownerOf(g.id).first+'s ')+'Brille vom '+fmtDate(g.date),status:'Offen',date:today()});
   persist();
   setTimeout(()=>addMsg({from:'status',icon:'📨',title:(dmg.kasko?'Kasko-Fall ':'Schadensmeldung ')+nr+' eingegangen',text:'Wir prüfen Ihre Angaben und melden uns hier im Chat.',action:['Antworten',"go('chat')"]},false),0);
   successView(dmg.kasko?'Kasko-Fall gemeldet':'Meldung gesendet','Vorgangsnr. '+nr+'. Die Filiale '+curStore().name+' prüft '+(dmg.kasko?'den Kasko-Fall':'den Schaden')+' und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
@@ -1274,9 +1326,9 @@ function onbRender(){
   let h='';
   if(onb.step===0) h=`<div class="hero-logo"><img src="${logo}" alt=""><div class="wordmark" style="align-items:center"><span class="wm-top" style="font-size:18px;padding:6px 6px 6px 12px">FALKNER</span><span class="wm-sub" style="font-size:14px">OPTIK · SEHZENTRUM</span></div></div>
     <h1 style="text-align:center;font-size:28px">Willkommen!</h1><p class="sub" style="text-align:center;margin-top:6px">Brillenpass, Kontaktlinsen, Termine und der direkte Draht zu Ihrem Optiker – alles in einer App.</p>
-    <button class="btn accent" style="margin-top:28px" onclick="onb.mode='existing';onb.step=1;onbRender()">Ich bin bereits Kunde</button>
+    <button class="btn accent" style="margin-top:28px" onclick="onb.mode='existing';onb.step=1;onbRender()">Anmelden</button>
     <button class="btn ghost" style="margin-top:10px" onclick="onb.mode='new';onb.step=1;onbRender()">Neu registrieren</button>
-    <p class="muted-s" style="text-align:center;margin-top:18px">Demo: „Ich bin bereits Kunde“ mit Kundennummer <b>104772</b></p>`;
+    <p class="muted-s" style="text-align:center;margin-top:18px">Demo: „Anmelden“ mit Kundennummer <b>104772</b></p>`;
   if(onb.step===1&&onb.mode==='existing') h=onbSteps(1)+`<h1 style="font-size:26px">Konto verknüpfen</h1><p class="sub">Ihre Kundennummer finden Sie auf Ihrer Rechnung oder Kundenkarte${inv?' – sie wurde aus Ihrer Einladung übernommen':''}.</p>
     <label class="f">Kundennummer</label><input class="input" id="oKd" inputmode="numeric" value="${esc(inv||'')}" placeholder="z. B. 104772">
     <label class="f">Geburtsdatum</label><input class="input" id="oBirth" type="date">

@@ -159,7 +159,7 @@ table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--surf
     <div id="navList"></div>
     <div class="side-foot"><div class="sideuser"><span class="av" id="sideAv" style="width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700">T</span><div class="grow"><b id="sideName">–</b><div id="sideRole" class="small"></div></div></div>
       <button class="btn ghost sm" style="margin-top:10px;width:100%" onclick="logout()">Abmelden</button>
-      <div style="margin-top:10px">Dashboard-Prototyp v0.5<br>Alle Kundendaten sind Beispieldaten.</div></div>
+      <div style="margin-top:10px">Dashboard-Prototyp v0.6<br>Alle Kundendaten sind Beispieldaten.</div></div>
   </aside>
   <main>
     <div class="top">
@@ -325,8 +325,9 @@ const TPL_DEFAULT=[
   ['📦','Ware eingetroffen','Bestellung eingetroffen','Ihre bestellte Ware ist in der Filiale {f} eingetroffen.',''],
   ['📞','Rückruf erbeten','Bitte um Rückruf','Wir haben eine kurze Frage zu Ihrem Auftrag. Bitte rufen Sie uns an: {t}.',''],
   ['⭐','Bewertung anfragen','Wie war Ihr Besuch?','Wir freuen uns über Ihre Bewertung – das dauert nur wenige Sekunden.','rate']];
-const SNIP_DEFAULT=['Gerne! Wir haben heute bis 18 Uhr für Sie geöffnet.','Ihre Brille ist in Arbeit – wir melden uns, sobald sie fertig ist.','Bitte bringen Sie die Brille in der Filiale vorbei, wir sehen sie uns kostenlos an.','Danke für Ihre Nachricht – wir rufen Sie heute noch zurück.'];
+const SNIP_DEFAULT=['Gerne! Wir haben heute bis 18 Uhr für Sie geöffnet.','Ihre Brille ist in Arbeit – wir melden uns, sobald sie fertig ist.','Bitte bringen Sie die Brille in der Filiale vorbei, wir sehen sie uns kostenlos an.','Danke für Ihre Nachricht – wir rufen Sie heute noch zurück.','Kostenvoranschlag zu Ihrer Reparatur: voraussichtlich € ___ inkl. MwSt. Sollen wir die Reparatur durchführen? Bitte geben Sie uns kurz Bescheid.'];
 D.templates=D.templates||JSON.parse(JSON.stringify(TPL_DEFAULT)); D.snippets=D.snippets||SNIP_DEFAULT.slice();
+if(!D.kvSnip){if(!D.snippets.some(x=>/^Kostenvoranschlag/.test(x)))D.snippets.push(SNIP_DEFAULT[SNIP_DEFAULT.length-1]);D.kvSnip=1;saveD()}
 
 /* Live-Kunde aus der App */
 function liveCust(){return {id:'live',live:true,kdnr:S.profile.kdnr,name:S.profile.first+' '+S.profile.last,store:S.store||'perg',phone:S.profile.phone,mail:S.profile.mail,
@@ -498,9 +499,25 @@ function orderDetail(cid,tid){
     <span>Betreff</span><b>${esc(t.title)}</b>${t.damage?`<span>Schaden</span><b>${esc(t.damage)}</b>`:''}${t.side?`<span>Seite</span><b>${esc(t.side)}</b>`:''}${t.part?`<span>Bereich</span><b>${esc(t.part)}</b>`:''}
     ${t.desc!==undefined?`<span>Beschreibung</span><b>${t.desc?esc(t.desc):'–'}</b>`:''}${t.how?`<span>Gewünscht</span><b>${esc(t.how)}</b>`:''}
     ${t.kasko!==undefined?`<span>Vollkasko</span><b>${t.kasko?'Ja – Kasko-Fall':'Nein'}</b>`:''}
+    ${t.quote!==undefined?`<span>Kostenvoranschlag</span><b>${t.quote?(t.quoteSent?'gesendet: '+eurK(t.quoteSent)+' am '+fmtDate(t.quoteDate):'<span style="color:var(--danger)">vom Kunden gewünscht</span>'):'nicht gewünscht'}</b>`:''}
     <span>Status</span><b>${statusBadge(t.status)}</b></div>
     <h2 style="margin-top:16px">Fotos vom Kunden</h2>${t.photos&&t.photos.length?`<div class="photos">${t.photos.map(src=>`<img src="${src}" onclick="window.open().document.write('<img src=&quot;'+this.src+'&quot; style=&quot;max-width:100%&quot;>')">`).join('')}</div>`:'<p class="muted">Keine Fotos angehängt.</p>'}
-    <div class="row" style="margin-top:16px;gap:8px"><button class="btn ghost" onclick="closeModal();go('inbox','${c.parent?'live':c.id}')">Kunden anschreiben</button><span class="grow"></span><button class="btn" onclick="closeModal()">Schließen</button></div>`);
+    <div class="row" style="margin-top:16px;gap:8px"><button class="btn ghost" onclick="closeModal();go('inbox','${c.parent?'live':c.id}')">Kunden anschreiben</button>${t.quote!==undefined?`<button class="btn ${t.quote&&!t.quoteSent?'accent':'ghost'}" onclick="quoteModal('${cid}','${tid}')">💶 Kostenvoranschlag senden</button>`:''}<span class="grow"></span><button class="btn" onclick="closeModal()">Schließen</button></div>`);
+}
+function quoteModal(cid,tid){
+  const c=cust(cid), t=c.tickets.find(x=>x.id===tid), snip=D.snippets.find(x=>/^Kostenvoranschlag/.test(x))||SNIP_DEFAULT[SNIP_DEFAULT.length-1];
+  modal('Kostenvoranschlag senden',`<p class="muted small">${esc(t.title)}</p>
+    <label class="f">Betrag (€, inkl. MwSt.)</label><input class="input" id="kvB" type="number" min="0" step="0.5" value="${t.quoteSent||''}" style="width:160px">
+    ${t.kasko?`<p class="small" style="margin-top:6px">Kasko-Fall: Bitte den Selbstbehalt laut Police angeben (${esc(kaskoCfg().pct)} % vom Glaspreis).</p>`:''}
+    <label class="f">Nachricht (Textbaustein)</label><textarea class="input" id="kvT" rows="4">${esc(snip)}</textarea>
+    <div class="row" style="margin-top:14px;justify-content:flex-end;gap:8px"><button class="btn ghost" onclick="orderDetail('${cid}','${tid}')">Zurück</button><button class="btn accent" onclick="sendQuote('${cid}','${tid}')">An Kunden senden</button></div>`);
+}
+function sendQuote(cid,tid){
+  const b=+document.getElementById('kvB').value; if(!(b>0)){toast('Bitte einen Betrag eingeben');return}
+  const amt=b.toLocaleString('de-AT',{minimumFractionDigits:2,maximumFractionDigits:2}), txt=document.getElementById('kvT').value.replace(/€\s*_+/,'€ '+amt), c=cust(cid);
+  mutate(cid,x=>{const tk=x.tickets.find(k=>k.id===tid);tk.quoteSent=b;tk.quoteDate=today();
+    x.chat.push({id:uid('s'),from:'status',store:x.store,icon:'💶',title:'Kostenvoranschlag',text:txt+(/€\s*\d/.test(txt)?'':' (Betrag: € '+amt+')'),ts:new Date().toISOString(),read:false})});
+  closeModal(); toast('Kostenvoranschlag an '+c.name+' gesendet');
 }
 function setTicket(cid,tid,status){
   const c=cust(cid), notify=document.getElementById('notifyCust')?document.getElementById('notifyCust').checked:true, done=status==='Abgeschlossen';
@@ -574,7 +591,7 @@ function vCustomers(){
   const rxV=(eye,f)=>`<span style="display:block;padding:6px;border-radius:7px;background:var(--surface-2);font-weight:600">${esc(g[eye][f]||'–')}</span>`;
   const ki=g?kaskoInfo(g):null;
   V(`<div class="cust">
-    <div class="card"><div class="muted small" style="margin-bottom:8px">📥 Kunden kommen aus dem IOM</div><input class="input" placeholder="Kunde suchen …" value="${esc(q)}" oninput="q=this.value;render();const i=document.querySelector('.cust .input');i.focus();i.setSelectionRange(q.length,q.length)">
+    <div class="card"><input class="input" placeholder="Kunde suchen …" value="${esc(q)}" oninput="q=this.value;render();const i=document.querySelector('.cust .input');i.focus();i.setSelectionRange(q.length,q.length)">
       <div style="margin-top:8px">${cs.map(x=>`<div class="li" style="cursor:pointer;${x.id===selCust?'background:var(--accent-soft);border-radius:9px;padding-left:8px':''}" onclick="selCust='${x.id}';render()"><span class="cav">${initials(x.name)}</span><div class="grow"><b>${custName(x)}</b><div class="muted small">${x.parent?esc(x.relation)+' von '+esc(x.parent):'Filiale '+storeName(x.store)}</div></div>${unreadOf(x)?'<span class="dot"></span>':''}</div>`).join('')||'<p class="empty">Kein Kunde gefunden</p>'}</div></div>
     <div class="grid">
       <div class="card"><div class="row"><span class="cav" style="width:48px;height:48px;font-size:18px">${initials(c.name)}</span><div class="grow"><h3>${custName(c)}</h3><div class="muted">${c.parent?esc(c.relation)+(c.birth?' · Jg. '+esc(c.birth):'')+' · Konto von '+esc(c.parent)+' · ':''}Stammfiliale ${storeName(c.store)} · ${esc(c.phone)}</div></div>
@@ -582,18 +599,18 @@ function vCustomers(){
         <div class="muted small" style="margin-top:8px">Kundennr. ${esc(c.kdnr||'–')} · ${c.live?'<span class="badge b-ok">App aktiv</span>':c.invited?'<span class="badge b-warn">Eingeladen am '+fmtDate(c.invited)+'</span>':'<span class="badge b-mute">Noch nicht eingeladen</span>'}</div>
         ${fam.length?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><span class="muted small">Familie:</span>${fam.map(k=>`<button class="btn ghost sm" onclick="selCust='live:${k.id}';render()">👤 ${esc(k.first)} · ${esc(k.relation)}</button>`).join('')}</div>`:''}</div>
       <div class="grid two">
-        <div class="card"><div class="row"><h2 class="grow" style="margin:0">Brillenpass</h2><span class="badge b-mute">aus IOM · nur lesen</span></div>${g?`<div class="muted small" style="margin-top:8px">Messung vom ${fmtDate(g.date)}</div>
+        <div class="card"><div class="row"><h2 class="grow" style="margin:0">Brillenpass</h2></div>${g?`<div class="muted small" style="margin-top:8px">Messung vom ${fmtDate(g.date)}</div>
           <table class="rx"><tr><th></th><th>Sph</th><th>Zyl</th><th>Achse</th><th>Add</th></tr>
           <tr><td>R</td><td>${rxV('R','sph')}</td><td>${rxV('R','cyl')}</td><td>${rxV('R','ax')}</td><td>${rxV('R','add')}</td></tr>
           <tr><td>L</td><td>${rxV('L','sph')}</td><td>${rxV('L','cyl')}</td><td>${rxV('L','ax')}</td><td>${rxV('L','add')}</td></tr></table>
           <div class="kvs" style="grid-template-columns:150px 1fr"><span>Pupillendistanz</span><b>${esc(g.pd||'–')} mm</b>
           <span>Vollkasko</span><b>${ki?(ki.active?'<span style="color:var(--ok)">aktiv bis '+fmtDate(ki.until)+'</span>':'abgelaufen am '+fmtDate(ki.until)):'keine'}</b>
           ${ki?`<span>Deckung</span><b>${esc(ki.cover)} · Selbstbehalt ${esc(ki.ded)}</b>`:''}</div>
-          <p class="muted small" style="margin-top:10px">Messwerte werden im IOM gepflegt und automatisch übernommen.</p>`
+`
           :`<p class="empty">Noch kein Brillenpass im IOM</p>`}</div>
         <div class="card"><div class="row"><h2 class="grow" style="margin:0">Kontaktlinsen & Treuepass</h2></div>${L?`<div class="row" style="margin-top:8px"><b class="grow">${LENS_KIND[L.kind]||''}</b><span class="badge b-mute">${esc(L.wear)}</span></div>
           <div class="muted small" style="margin-top:8px">R: Sph ${esc(L.R.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.R.cyl)+' · A '+esc(L.R.ax):''}${L.kind==='multifokal'?' · Add '+esc(L.R.add):''} &nbsp; L: Sph ${esc(L.L.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.L.cyl)+' · A '+esc(L.L.ax):''}${L.kind==='multifokal'?' · Add '+esc(L.L.add):''}</div>
-          <p class="muted small" style="margin-top:6px">Linsenwerte aus dem IOM · nur lesen</p>`
+`
           :'<p class="muted" style="margin-top:8px">Keine Kontaktlinsen hinterlegt</p>'}
           ${c.parent?'':`<label class="f">Treuepunkte</label>`}<div class="row" style="${c.parent?'display:none':''}"><div class="stamps">${Array.from({length:Y.goal},(_,i)=>`<span class="stamp ${i<Y.points?'on':''}"></span>`).join('')}</div><span class="grow"></span>
           <button class="btn ghost sm" onclick="pts('${c.id}',-1)">−</button><button class="btn ghost sm" onclick="pts('${c.id}',1)">+1 Punkt</button></div>
