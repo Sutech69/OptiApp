@@ -456,7 +456,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v0.9 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.0 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -524,11 +524,11 @@ const DEFAULT = {
   glasses:[
     {id:'g1',date:'2026-03-14',
      R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'+1,50'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'+1,50'},pd:'31,5 / 32,0',
-     kasko:{until:'2028-03-14',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
-     purchase:{nr:'R-2026-0314',items:[['Korrektionsfassung',189],['Gleitsichtgläser, entspiegelt (Paar)',598],['Vollkasko 2 Jahre',39]]}},
+     kasko:true,
+     purchase:{nr:'R-2026-0314',items:[['Korrektionsfassung',189],['Gleitsichtgläser, entspiegelt (Paar)',598],['Vollkasko 1 Jahr',39]]}},
     {id:'g2',date:'2025-05-22',
      R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'–'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'–'},pd:'31,5 / 32,0',
-     kasko:{until:'2026-05-22',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
+     kasko:true,
      purchase:{nr:'R-2025-0522',items:[['Sonnenbrillenfassung',149],['Einstärkengläser, polarisiert (Paar)',238],['Vollkasko 1 Jahr',25]]}}
   ],
   // kind: 'sphärisch' | 'torisch' | 'multifokal' – Produktname wird bewusst nicht angezeigt
@@ -539,8 +539,8 @@ const DEFAULT = {
   family:[{id:'k1',first:'Lena',last:'Karlinger',relation:'Tochter',birth:'2017',lenses:null,
     glasses:[{id:'k1g1',date:'2026-07-08',note:'Myopie-Management-Gläser',
       R:{sph:'-1,25',cyl:'–',ax:'–',add:'–'},L:{sph:'-1,50',cyl:'-0,25',ax:'170',add:'–'},pd:'28,0 / 28,5',
-      kasko:{until:'2028-07-08',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
-      purchase:{nr:'R-2026-0708',items:[['Kinderfassung',89],['Myopie-Management-Gläser (Paar)',420],['Vollkasko 2 Jahre',29]]}}]}],
+      kasko:true,
+      purchase:{nr:'R-2026-0708',items:[['Kinderfassung',89],['Myopie-Management-Gläser (Paar)',420],['Vollkasko 1 Jahr',29]]}}]}],
   loyalty:{points:3,goal:5,reward:'Pflegemittel-Set gratis',vouchers:[]},
   appts:[{id:'a0',type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:'perg',rated:false},
          {id:'a1',type:'Kontaktlinsen-Kontrolle',date:workday(9),time:'10:30',store:'perg'}],
@@ -564,6 +564,18 @@ const NEWS=[
 const LENS_KIND={'sphärisch':'Sphärische Kontaktlinsen','torisch':'Torische Kontaktlinsen','multifokal':'Multifokale Kontaktlinsen'};
 const LENS_HINT={'sphärisch':'Korrigieren Kurz- oder Weitsichtigkeit','torisch':'Zusätzlich mit Hornhautverkrümmungs-Korrektur','multifokal':'Für Nähe und Ferne (Alterssichtigkeit)'};
 
+// Vollkasko: Bedingungen legt der Inhaber im Dashboard fest (Standard: 1 Jahr, nur Gläser, 30 % Selbstbehalt)
+const KASKO_DEFAULT={months:12,pct:30,cover:'glass'};
+const kaskoCfg=()=>Object.assign({},KASKO_DEFAULT,(typeof S!=='undefined'&&S&&S.kaskoCfg)||{});
+const eurK=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
+const glassPrice=g=>{const it=((g.purchase||{}).items||[]).find(x=>/gläser|glas/i.test(x[0])&&!/kasko/i.test(x[0]));return it?it[1]:null};
+function kaskoInfo(g){
+  if(!g||!g.kasko) return null; const c=kaskoCfg(), d=new Date(g.date+'T12:00'); d.setMonth(d.getMonth()+(+c.months));
+  const until=d.toISOString().slice(0,10), gp=glassPrice(g), t=new Date().toISOString().slice(0,10);
+  return {until,active:until>=t,months:+c.months,pct:+c.pct,glassOnly:c.cover!=='all',cover:c.cover==='all'?'Brillengläser und Fassung':'Nur Brillengläser',
+    ded:c.pct+' % vom Glaspreis'+(gp!=null?' ('+eurK(gp*c.pct/100)+')':'')};
+}
+const kaskoLabel=m=>m%12===0?(m/12)+(m===12?' Jahr':' Jahre'):m+' Monate';
 // Auftragsstatus: nur noch Offen / In Bearbeitung / Abgeschlossen
 const normStatus=s=>({'Eingegangen':'Offen','In Prüfung':'Offen','Wird bereitgelegt':'Offen','Versand vorbereitet':'Offen','In Arbeit':'In Bearbeitung','Abholbereit':'Abgeschlossen','Versendet':'Abgeschlossen'})[s]||s;
 let S;
@@ -571,6 +583,7 @@ try{S=JSON.parse(localStorage.getItem('falkner-v10'))}catch(e){}
 const FIRST_RUN=!S;
 if(!S) S=JSON.parse(JSON.stringify(DEFAULT));
 S.ui=S.ui||{theme:'system',fs:1,hc:false}; S.storeCfg=S.storeCfg||{}; (S.tickets||[]).forEach(t=>t.status=normStatus(t.status));
+[S.glasses||[],...(S.family||[]).map(k=>k.glasses||[])].flat().forEach(g=>{if(g.kasko&&typeof g.kasko==='object')g.kasko=true;if(g.purchase)g.purchase.items.forEach(x=>{if(/^Vollkasko \d+ Jahre?$/.test(x[0]))x[0]='Vollkasko 1 Jahr'})});
 // Filial-Einstellungen aus dem Dashboard (Öffnungszeiten, Urlaub, Kontaktdaten) übernehmen
 const STORES_BASE=JSON.parse(JSON.stringify(STORES));
 function applyStoreCfg(){Object.keys(STORES).forEach(id=>{Object.assign(STORES[id],JSON.parse(JSON.stringify(STORES_BASE[id])),(S.storeCfg||{})[id]||{})})}
@@ -673,7 +686,7 @@ function rxTable(R,L,cols){
   const row=(e,o)=>`<tr><td><span class="eye">${e}</span></td>${cols.map(c=>`<td>${o[c[1]]}</td>`).join('')}</tr>`;
   return `<table class="rx"><tr><th></th>${head}</tr>${row('R',R)}${row('L',L)}</table>`;
 }
-const kaskoActive=g=>g.kasko&&g.kasko.until>=today();
+const kaskoActive=g=>!!(kaskoInfo(g)||{}).active;
 function renderGlasses(){
   const P=curP(), list=[...P.glasses].sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('glassesContent').innerHTML=whoBar()+(list.length?'':`<div class="card mt"><b>Noch keine Messwerte für ${esc(P.first)}</b><p class="muted-s" style="margin-top:4px">Die Werte werden nach der nächsten Messung in der Filiale eingetragen.</p><button class="btn accent" style="margin-top:14px" onclick="openSheet('book')">Termin für ${esc(P.first)} buchen</button></div>`)+list.map((g,i)=>`
@@ -682,7 +695,7 @@ function renderGlasses(){
       ${rxTable(g.R,g.L,[['Sph','sph'],['Zyl','cyl'],['Achse','ax'],['Add','add']])}
       <div class="kv"><div><span>Pupillendistanz (R/L)</span><b>${g.pd} mm</b></div>
         ${i===0&&checkupDue(P)?`<div><span>Nächster Sehtest</span><b>ab ${fmtDate(checkupDue(P).date)}</b></div>`:''}
-        <div><span>Vollkasko</span><b style="color:${kaskoActive(g)?'var(--ok)':'var(--muted)'}">${g.kasko?(kaskoActive(g)?'bis '+fmtDate(g.kasko.until):'abgelaufen'):'keine'}</b></div></div>
+        <div><span>Vollkasko</span><b style="color:${kaskoActive(g)?'var(--ok)':'var(--muted)'}">${g.kasko?(kaskoActive(g)?'bis '+fmtDate(kaskoInfo(g).until):'abgelaufen'):'keine'}</b></div></div>
       <div class="btn-row"><button class="btn ghost" onclick="openSheet('damage','${g.id}')">Schaden melden</button><button class="btn ghost" onclick="sharePass('${g.id}')">Teilen</button></div>
       <button class="btn outline" onclick="openSheet('kasko','${g.id}')">Vollkasko nutzen</button>
       <button class="btn ghost" style="margin-top:10px" onclick="openSheet('docs','${g.id}')">📄 Dokumente${g.purchase?' ('+(g.kasko?3:2)+')':''}</button>
@@ -937,34 +950,48 @@ function sheetStore(first){
 }
 
 /* --- Schaden melden & Vollkasko (mit Zusammenfassung) --- */
-const DMG_TYPES=['Glas zerkratzt','Glas gebrochen','Bügel lose/gebrochen','Nasenpad','Schraube fehlt','Sitzt schief','Sonstiges'];
+const DMG_TYPES=['Glas zerkratzt','Glas gebrochen','Bügel lose/gebrochen','Nasenpad','Lack geht ab','Sonstiges'];
+const SIDE_OPTS=['Rechts','Links','Beides'], PART_OPTS=['Mittelteil','Bügel','Beides'];
+const needsSide=t=>t!=='Lack geht ab'&&t!=='Sonstiges', needsPart=t=>t==='Lack geht ab';
+const isGlassDmg=t=>/^Glas/.test(t);
 let dmg={};
 const howOpts=()=>['In Filiale '+curStore().name+' vorbeibringen','Rückruf erwünscht'];
-function sheetDamage(gid){dmg={gid:gid||latestGlasses().id,kasko:false,type:DMG_TYPES[0],text:'',photos:[],how:0};renderDamageForm()}
+// Kasko-Frage: wenn die Brille noch innerhalb der Vollkasko-Laufzeit ist (bei „nur Gläser“ nur bei Glasschäden)
+const askKasko=()=>{const g=findGlasses(dmg.gid),k=kaskoInfo(g);return !!(k&&k.active&&(!k.glassOnly||isGlassDmg(dmg.type)))};
+function sheetDamage(gid){dmg={gid:gid||latestGlasses().id,kasko:null,type:DMG_TYPES[0],side:null,part:null,text:'',photos:[],how:0,err:''};renderDamageForm()}
 function sheetKasko(gid){
   const g=findGlasses(gid)||latestGlasses();
   if(!kaskoActive(g)){
     setSheet('Vollkasko',`
       <div class="kasko-box off"><b>Für diese Brille besteht derzeit keine aktive Vollkasko.</b>
-      <div class="muted-s" style="margin-top:4px">${g.kasko?'Die Versicherung ist am '+fmtDate(g.kasko.until)+' abgelaufen.':'Diese Brille wurde ohne Kasko gekauft.'}</div></div>
+      <div class="muted-s" style="margin-top:4px">${g.kasko?'Die Versicherung ('+kaskoLabel(kaskoInfo(g).months)+') ist am '+fmtDate(kaskoInfo(g).until)+' abgelaufen.':'Diese Brille wurde ohne Kasko gekauft.'}</div></div>
       <p class="sub mt">Sie können den Schaden trotzdem melden – wir schauen uns die Brille gerne an.</p>
       <button class="btn accent" style="margin-top:16px" onclick="sheetDamage('${g.id}')">Normalen Schaden melden</button>
       <a class="btn ghost" style="margin-top:10px;text-decoration:none" href="tel:${curStore().telLink}">Filiale anrufen</a>`);
     return;
   }
-  dmg={gid:g.id,kasko:true,type:DMG_TYPES[1],text:'',photos:[],how:0};renderDamageForm();
+  dmg={gid:g.id,kasko:true,viaKasko:true,type:DMG_TYPES[1],side:null,part:null,text:'',photos:[],how:0,err:''};renderDamageForm();
 }
-function kaskoBox(g){return `<div class="kasko-box"><b>✓ Vollkasko aktiv bis ${fmtDate(g.kasko.until)}</b>
-  <div class="muted-s" style="margin-top:4px">Gedeckt: ${esc(g.kasko.cover)}<br>Selbstbehalt: ${esc(g.kasko.deductible)}</div></div>`}
+function kaskoBox(g){const k=kaskoInfo(g);return `<div class="kasko-box"><b>✓ Vollkasko aktiv bis ${fmtDate(k.until)}</b>
+  <div class="muted-s" style="margin-top:4px">Gedeckt: ${esc(k.cover)}<br>Selbstbehalt: ${esc(k.ded)}</div></div>`}
+function setDmg(k,v){dmg[k]=v;dmg.err='';if(k==='type'){if(!needsSide(v))dmg.side=null;if(!needsPart(v))dmg.part=null;if(!dmg.viaKasko)dmg.kasko=null}if(k==='gid'&&!dmg.viaKasko)dmg.kasko=null;renderDamageForm()}
 function renderDamageForm(){
-  const g=findGlasses(dmg.gid);
-  setSheet(dmg.kasko?'Vollkasko nutzen':'Schaden melden',`
-    ${dmg.kasko?kaskoBox(g)+`<label class="f">Versicherte Brille</label><div class="input">${esc(ownerOf(g.id).first)} – Brille vom ${fmtDate(g.date)}</div>`
+  const g=findGlasses(dmg.gid), k=kaskoInfo(g), sc=document.getElementById('sheetBody').scrollTop;
+  if(!askKasko()&&!dmg.viaKasko) dmg.kasko=false;
+  const types=dmg.viaKasko&&k&&k.glassOnly?DMG_TYPES.filter(isGlassDmg):DMG_TYPES;
+  const chips=(opts,cur,key)=>`<div class="chips">${opts.map(o=>`<button class="chip ${o===cur?'on':''}" onclick="setDmg('${key}','${o}')">${o}</button>`).join('')}</div>`;
+  setSheet(dmg.viaKasko?'Vollkasko nutzen':'Schaden melden',`
+    ${dmg.viaKasko?kaskoBox(g)+`<label class="f">Versicherte Brille</label><div class="input">${esc(ownerOf(g.id).first)} – Brille vom ${fmtDate(g.date)}</div>`
       :`<p class="sub">Beschreiben Sie kurz den Schaden – wir melden uns innerhalb von 24 h.</p>
     <label class="f">Betroffene Brille</label>
-    <select class="input" id="dGlass" onchange="dmg.gid=this.value">${allGlasses().map(({g:x,p})=>`<option value="${x.id}" ${x.id===dmg.gid?'selected':''}>${esc(p.first)} – Brille vom ${fmtDate(x.date)}</option>`).join('')}</select>`}
-    <label class="f">Art des Schadens</label>
-    <div class="chips" id="dType">${DMG_TYPES.map(t=>`<button class="chip ${t===dmg.type?'on':''}" onclick="pickChip(this);dmg.type='${t}'">${t}</button>`).join('')}</div>
+    <select class="input" id="dGlass" onchange="setDmg('gid',this.value)">${allGlasses().map(({g:x,p})=>`<option value="${x.id}" ${x.id===dmg.gid?'selected':''}>${esc(p.first)} – Brille vom ${fmtDate(x.date)}</option>`).join('')}</select>`}
+    <label class="f">Art des Schadens</label>${chips(types,dmg.type,'type')}
+    ${needsSide(dmg.type)?`<label class="f">Welche Seite? *</label>${chips(SIDE_OPTS,dmg.side,'side')}`:''}
+    ${needsPart(dmg.type)?`<label class="f">Welcher Bereich? *</label>${chips(PART_OPTS,dmg.part,'part')}`:''}
+    ${!dmg.viaKasko&&askKasko()?`<div class="kasko-box" style="margin-top:16px"><b>Soll die Vollkasko greifen? *</b>
+      <div class="muted-s" style="margin-top:4px">Ihre Brille ist bis ${fmtDate(k.until)} versichert (${esc(k.cover)}). Selbstbehalt: ${esc(k.ded)}.</div>
+      <div class="chips" style="margin-top:10px"><button class="chip ${dmg.kasko===true?'on':''}" onclick="setDmg('kasko',true)">Ja, Vollkasko nutzen</button><button class="chip ${dmg.kasko===false?'on':''}" onclick="setDmg('kasko',false)">Nein</button></div></div>`
+      :(!dmg.viaKasko&&k&&k.active&&k.glassOnly&&!isGlassDmg(dmg.type)?`<p class="muted-s" style="margin-top:12px">ℹ️ Die Vollkasko dieser Brille deckt nur Brillengläser.</p>`:'')}
     <label class="f">Beschreibung</label>
     <textarea class="input" id="dText" oninput="dmg.text=this.value" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht.">${esc(dmg.text)}</textarea>
     <label class="f">Fotos (optional)</label>
@@ -972,7 +999,10 @@ function renderDamageForm(){
     <div class="thumbs" id="thumbs">${dmg.photos.map(src=>`<img src="${src}">`).join('')}</div>
     <label class="f">Wie möchten Sie vorgehen?</label>
     <div class="chips">${howOpts().map((h,i)=>`<button class="chip ${i===dmg.how?'on':''}" onclick="pickChip(this);dmg.how=${i}">${esc(h)}</button>`).join('')}</div>
-    <button class="btn accent mt" style="margin-top:20px" onclick="damageSummary()">${dmg.kasko?'Kasko-Fall prüfen':'Meldung absenden'}</button>`);
+    ${dmg.err?`<p class="muted-s" style="color:var(--danger);margin-top:14px;font-weight:600">${esc(dmg.err)}</p>`:''}
+    <p class="muted-s" style="margin-top:10px">* Pflichtfeld</p>
+    <button class="btn accent mt" style="margin-top:12px" onclick="damageSummary()">${dmg.kasko?'Kasko-Fall prüfen':'Meldung absenden'}</button>`);
+  document.getElementById('sheetBody').scrollTop=sc;
 }
 function shrinkImg(src,max,cb){const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.72))};im.onerror=()=>cb(src);im.src=src}
 function previewImgs(inp){
@@ -980,6 +1010,8 @@ function previewImgs(inp){
 }
 function damageSummary(){
   const g=findGlasses(dmg.gid);
+  const miss=needsSide(dmg.type)&&!dmg.side?'Bitte wählen Sie die Seite (Rechts, Links oder Beides).':needsPart(dmg.type)&&!dmg.part?'Bitte wählen Sie den Bereich (Mittelteil, Bügel oder Beides).':(!dmg.viaKasko&&askKasko()&&dmg.kasko===null)?'Bitte geben Sie an, ob die Vollkasko greifen soll.':'';
+  if(miss){dmg.err=miss;renderDamageForm();document.getElementById('sheetBody').scrollTop=1e5;return}
   setSheet('Bitte Angaben prüfen',`
     <p class="sub">Stimmt alles? Erst nach „Verbindlich absenden“ geht die Meldung an die Filiale.</p>
     <div class="card" style="background:var(--surface-2);box-shadow:none;margin-top:14px">
@@ -987,11 +1019,13 @@ function damageSummary(){
         <span>Art</span><b>${dmg.kasko?'Vollkasko-Fall':'Schadensmeldung'}</b>
         <span>Brille</span><b>${esc(ownerOf(g.id).first)} – Messung vom ${fmtDate(g.date)}</b>
         <span>Schaden</span><b>${esc(dmg.type)}</b>
+        ${dmg.side?`<span>Seite</span><b>${esc(dmg.side)}</b>`:''}${dmg.part?`<span>Bereich</span><b>${esc(dmg.part)}</b>`:''}
+        ${kaskoInfo(g)&&kaskoInfo(g).active?`<span>Vollkasko</span><b>${dmg.kasko?'Ja':'Nein'}</b>`:''}
         <span>Beschreibung</span><b>${dmg.text.trim()?esc(dmg.text.trim()):'–'}</b>
         <span>Fotos</span><b>${dmg.photos.length?dmg.photos.length+' Foto'+(dmg.photos.length>1?'s':''):'keine'}</b>
         <span>Vorgehen</span><b>${esc(howOpts()[dmg.how])}</b>
         <span>Filiale</span><b>${esc(curStore().full)}</b>
-        ${dmg.kasko?`<span>Selbstbehalt</span><b>${esc(g.kasko.deductible)}</b>`:''}
+        ${dmg.kasko?`<span>Selbstbehalt</span><b>${esc(kaskoInfo(g).ded)}</b>`:''}
       </div>
       ${dmg.photos.length?`<div class="thumbs" style="margin-top:12px">${dmg.photos.map(src=>`<img src="${src}">`).join('')}</div>`:''}
     </div>
@@ -1000,7 +1034,7 @@ function damageSummary(){
 }
 function submitDamage(){
   const g=findGlasses(dmg.gid), nr=(dmg.kasko?'KF-':'SM-')+String(Date.now()).slice(-5);
-  S.tickets.unshift({id:'t'+Date.now(),nr,photos:dmg.photos.slice(),desc:dmg.text.trim(),how:howOpts()[dmg.how],damage:dmg.type,kasko:dmg.kasko,kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+' – '+(ownerOf(g.id).id==='me'?'':ownerOf(g.id).first+'s ')+'Brille vom '+fmtDate(g.date),status:'Offen',date:today()});
+  S.tickets.unshift({id:'t'+Date.now(),nr,photos:dmg.photos.slice(),desc:dmg.text.trim(),how:howOpts()[dmg.how],damage:dmg.type,side:dmg.side||undefined,part:dmg.part||undefined,kasko:!!dmg.kasko,kind:dmg.kasko?'Vollkasko-Fall':'Schadensmeldung',title:dmg.type+(dmg.side?' ('+dmg.side+')':dmg.part?' ('+dmg.part+')':'')+' – '+(ownerOf(g.id).id==='me'?'':ownerOf(g.id).first+'s ')+'Brille vom '+fmtDate(g.date),status:'Offen',date:today()});
   persist();
   setTimeout(()=>addMsg({from:'status',icon:'📨',title:(dmg.kasko?'Kasko-Fall ':'Schadensmeldung ')+nr+' eingegangen',text:'Wir prüfen Ihre Angaben und melden uns hier im Chat.',action:['Antworten',"go('chat')"]},false),0);
   successView(dmg.kasko?'Kasko-Fall gemeldet':'Meldung gesendet','Vorgangsnr. '+nr+'. Die Filiale '+curStore().name+' prüft '+(dmg.kasko?'den Kasko-Fall':'den Schaden')+' und meldet sich in Kürze. Kleine Reparaturen erledigen wir in der hauseigenen Werkstatt.');
@@ -1034,7 +1068,7 @@ function showDoc(gid,kind){
     body=`<h3 style="margin-top:16px">Garantie-Zertifikat</h3><p style="margin-top:8px">Für die Brille von <b>${esc(o.first)} ${esc(o.last)}</b>, gekauft am ${fmtDate(g.date)} (Rechnung ${esc(P.nr)}).</p>
     <table><tr><td>Gewährleistung</td><td>bis ${fmtDate(u.toISOString().slice(0,10))}</td></tr><tr><td>Umfang</td><td>Material- und Verarbeitungsfehler</td></tr><tr><td>Anpassung & Service</td><td>kostenlos</td></tr></table>`}
   if(kind==='kasko') body=`<h3 style="margin-top:16px">Vollkasko-Police</h3><p style="margin-top:8px">Versicherte Person: <b>${esc(o.first)} ${esc(o.last)}</b></p>
-    <table><tr><td>Laufzeit</td><td>${fmtDate(g.date)} – ${fmtDate(g.kasko.until)}</td></tr><tr><td>Gedeckt</td><td>${esc(g.kasko.cover)}</td></tr><tr><td>Selbstbehalt</td><td>${esc(g.kasko.deductible)}</td></tr><tr><td>Status</td><td>${kaskoActive(g)?'aktiv':'abgelaufen'}</td></tr></table>`;
+    <table><tr><td>Laufzeit (${kaskoLabel(kaskoInfo(g).months)})</td><td>${fmtDate(g.date)} – ${fmtDate(kaskoInfo(g).until)}</td></tr><tr><td>Gedeckt</td><td>${esc(kaskoInfo(g).cover)}</td></tr><tr><td>Selbstbehalt</td><td>${esc(kaskoInfo(g).ded)}</td></tr><tr><td>Status</td><td>${kaskoActive(g)?'aktiv':'abgelaufen'}</td></tr></table>`;
   setSheet('Dokument',`<div class="paper">${head}${body}<span class="stamp-demo">BEISPIELDOKUMENT</span></div>
     <div class="btn-row"><button class="btn ghost" onclick="sheetDocs('${gid}')">Zurück</button><button class="btn ghost" onclick="toast('Im echten System als PDF zum Teilen')">Teilen</button></div>`);
 }

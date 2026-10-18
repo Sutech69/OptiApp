@@ -159,7 +159,7 @@ table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--surf
     <div id="navList"></div>
     <div class="side-foot"><div class="sideuser"><span class="av" id="sideAv" style="width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700">T</span><div class="grow"><b id="sideName">–</b><div id="sideRole" class="small"></div></div></div>
       <button class="btn ghost sm" style="margin-top:10px;width:100%" onclick="logout()">Abmelden</button>
-      <div style="margin-top:10px">Dashboard-Prototyp v0.4<br>Alle Kundendaten sind Beispieldaten.</div></div>
+      <div style="margin-top:10px">Dashboard-Prototyp v0.5<br>Alle Kundendaten sind Beispieldaten.</div></div>
   </aside>
   <main>
     <div class="top">
@@ -214,11 +214,11 @@ const DEFAULT = {
   glasses:[
     {id:'g1',date:'2026-03-14',
      R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'+1,50'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'+1,50'},pd:'31,5 / 32,0',
-     kasko:{until:'2028-03-14',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
-     purchase:{nr:'R-2026-0314',items:[['Korrektionsfassung',189],['Gleitsichtgläser, entspiegelt (Paar)',598],['Vollkasko 2 Jahre',39]]}},
+     kasko:true,
+     purchase:{nr:'R-2026-0314',items:[['Korrektionsfassung',189],['Gleitsichtgläser, entspiegelt (Paar)',598],['Vollkasko 1 Jahr',39]]}},
     {id:'g2',date:'2025-05-22',
      R:{sph:'-1,75',cyl:'-0,50',ax:'175',add:'–'},L:{sph:'-2,00',cyl:'-0,25',ax:'10',add:'–'},pd:'31,5 / 32,0',
-     kasko:{until:'2026-05-22',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
+     kasko:true,
      purchase:{nr:'R-2025-0522',items:[['Sonnenbrillenfassung',149],['Einstärkengläser, polarisiert (Paar)',238],['Vollkasko 1 Jahr',25]]}}
   ],
   // kind: 'sphärisch' | 'torisch' | 'multifokal' – Produktname wird bewusst nicht angezeigt
@@ -229,8 +229,8 @@ const DEFAULT = {
   family:[{id:'k1',first:'Lena',last:'Karlinger',relation:'Tochter',birth:'2017',lenses:null,
     glasses:[{id:'k1g1',date:'2026-07-08',note:'Myopie-Management-Gläser',
       R:{sph:'-1,25',cyl:'–',ax:'–',add:'–'},L:{sph:'-1,50',cyl:'-0,25',ax:'170',add:'–'},pd:'28,0 / 28,5',
-      kasko:{until:'2028-07-08',deductible:'€ 30',cover:'Bruch und Beschädigung von Fassung und Gläsern'},
-      purchase:{nr:'R-2026-0708',items:[['Kinderfassung',89],['Myopie-Management-Gläser (Paar)',420],['Vollkasko 2 Jahre',29]]}}]}],
+      kasko:true,
+      purchase:{nr:'R-2026-0708',items:[['Kinderfassung',89],['Myopie-Management-Gläser (Paar)',420],['Vollkasko 1 Jahr',29]]}}]}],
   loyalty:{points:3,goal:5,reward:'Pflegemittel-Set gratis',vouchers:[]},
   appts:[{id:'a0',type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:'perg',rated:false},
          {id:'a1',type:'Kontaktlinsen-Kontrolle',date:workday(9),time:'10:30',store:'perg'}],
@@ -254,6 +254,18 @@ const NEWS=[
 const LENS_KIND={'sphärisch':'Sphärische Kontaktlinsen','torisch':'Torische Kontaktlinsen','multifokal':'Multifokale Kontaktlinsen'};
 const LENS_HINT={'sphärisch':'Korrigieren Kurz- oder Weitsichtigkeit','torisch':'Zusätzlich mit Hornhautverkrümmungs-Korrektur','multifokal':'Für Nähe und Ferne (Alterssichtigkeit)'};
 
+// Vollkasko: Bedingungen legt der Inhaber im Dashboard fest (Standard: 1 Jahr, nur Gläser, 30 % Selbstbehalt)
+const KASKO_DEFAULT={months:12,pct:30,cover:'glass'};
+const kaskoCfg=()=>Object.assign({},KASKO_DEFAULT,(typeof S!=='undefined'&&S&&S.kaskoCfg)||{});
+const eurK=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
+const glassPrice=g=>{const it=((g.purchase||{}).items||[]).find(x=>/gläser|glas/i.test(x[0])&&!/kasko/i.test(x[0]));return it?it[1]:null};
+function kaskoInfo(g){
+  if(!g||!g.kasko) return null; const c=kaskoCfg(), d=new Date(g.date+'T12:00'); d.setMonth(d.getMonth()+(+c.months));
+  const until=d.toISOString().slice(0,10), gp=glassPrice(g), t=new Date().toISOString().slice(0,10);
+  return {until,active:until>=t,months:+c.months,pct:+c.pct,glassOnly:c.cover!=='all',cover:c.cover==='all'?'Brillengläser und Fassung':'Nur Brillengläser',
+    ded:c.pct+' % vom Glaspreis'+(gp!=null?' ('+eurK(gp*c.pct/100)+')':'')};
+}
+const kaskoLabel=m=>m%12===0?(m/12)+(m===12?' Jahr':' Jahre'):m+' Monate';
 // Auftragsstatus: nur noch Offen / In Bearbeitung / Abgeschlossen
 const normStatus=s=>({'Eingegangen':'Offen','In Prüfung':'Offen','Wird bereitgelegt':'Offen','Versand vorbereitet':'Offen','In Arbeit':'In Bearbeitung','Abholbereit':'Abgeschlossen','Versendet':'Abgeschlossen'})[s]||s;
 
@@ -483,7 +495,7 @@ function orderDetail(cid,tid){
   const c=cust(cid), t=c.tickets.find(x=>x.id===tid); if(!t)return;
   modal(esc(t.kind)+(t.nr?' · '+esc(t.nr):''),`<div class="kvs">
     <span>Kunde</span><b>${custName(c)}</b><span>Filiale</span><b>${storeName(c.store)}</b><span>Datum</span><b>${fmtDate(t.date)}</b>
-    <span>Betreff</span><b>${esc(t.title)}</b>${t.damage?`<span>Schaden</span><b>${esc(t.damage)}</b>`:''}
+    <span>Betreff</span><b>${esc(t.title)}</b>${t.damage?`<span>Schaden</span><b>${esc(t.damage)}</b>`:''}${t.side?`<span>Seite</span><b>${esc(t.side)}</b>`:''}${t.part?`<span>Bereich</span><b>${esc(t.part)}</b>`:''}
     ${t.desc!==undefined?`<span>Beschreibung</span><b>${t.desc?esc(t.desc):'–'}</b>`:''}${t.how?`<span>Gewünscht</span><b>${esc(t.how)}</b>`:''}
     ${t.kasko!==undefined?`<span>Vollkasko</span><b>${t.kasko?'Ja – Kasko-Fall':'Nein'}</b>`:''}
     <span>Status</span><b>${statusBadge(t.status)}</b></div>
@@ -559,9 +571,10 @@ function vCustomers(){
   if(!selCust||!cs.find(c=>c.id===selCust)) selCust=(cs[0]||customers().filter(inFilter)[0]||customers()[0]).id;
   const c=cust(selCust), g=[...c.glasses].sort((a,b)=>b.date.localeCompare(a.date))[0], L=c.lenses, Y=c.loyalty||{points:0,goal:5,vouchers:[]};
   const fam=c.id==='live'?S.family:[];
-  const rxIn=(eye,f)=>`<input value="${esc(g[eye][f])}" data-e="${eye}" data-f="${f}" class="gIn">`;
+  const rxV=(eye,f)=>`<span style="display:block;padding:6px;border-radius:7px;background:var(--surface-2);font-weight:600">${esc(g[eye][f]||'–')}</span>`;
+  const ki=g?kaskoInfo(g):null;
   V(`<div class="cust">
-    <div class="card"><button class="btn accent" style="width:100%;margin-bottom:10px" onclick="newCustomer()">+ Kunde anlegen</button><input class="input" placeholder="Kunde suchen …" value="${esc(q)}" oninput="q=this.value;render();const i=document.querySelector('.cust .input');i.focus();i.setSelectionRange(q.length,q.length)">
+    <div class="card"><div class="muted small" style="margin-bottom:8px">📥 Kunden kommen aus dem IOM</div><input class="input" placeholder="Kunde suchen …" value="${esc(q)}" oninput="q=this.value;render();const i=document.querySelector('.cust .input');i.focus();i.setSelectionRange(q.length,q.length)">
       <div style="margin-top:8px">${cs.map(x=>`<div class="li" style="cursor:pointer;${x.id===selCust?'background:var(--accent-soft);border-radius:9px;padding-left:8px':''}" onclick="selCust='${x.id}';render()"><span class="cav">${initials(x.name)}</span><div class="grow"><b>${custName(x)}</b><div class="muted small">${x.parent?esc(x.relation)+' von '+esc(x.parent):'Filiale '+storeName(x.store)}</div></div>${unreadOf(x)?'<span class="dot"></span>':''}</div>`).join('')||'<p class="empty">Kein Kunde gefunden</p>'}</div></div>
     <div class="grid">
       <div class="card"><div class="row"><span class="cav" style="width:48px;height:48px;font-size:18px">${initials(c.name)}</span><div class="grow"><h3>${custName(c)}</h3><div class="muted">${c.parent?esc(c.relation)+(c.birth?' · Jg. '+esc(c.birth):'')+' · Konto von '+esc(c.parent)+' · ':''}Stammfiliale ${storeName(c.store)} · ${esc(c.phone)}</div></div>
@@ -569,18 +582,19 @@ function vCustomers(){
         <div class="muted small" style="margin-top:8px">Kundennr. ${esc(c.kdnr||'–')} · ${c.live?'<span class="badge b-ok">App aktiv</span>':c.invited?'<span class="badge b-warn">Eingeladen am '+fmtDate(c.invited)+'</span>':'<span class="badge b-mute">Noch nicht eingeladen</span>'}</div>
         ${fam.length?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><span class="muted small">Familie:</span>${fam.map(k=>`<button class="btn ghost sm" onclick="selCust='live:${k.id}';render()">👤 ${esc(k.first)} · ${esc(k.relation)}</button>`).join('')}</div>`:''}</div>
       <div class="grid two">
-        <div class="card"><h2>Brillenpass</h2>${g?`<div class="muted small">Messung vom ${fmtDate(g.date)}</div>
+        <div class="card"><div class="row"><h2 class="grow" style="margin:0">Brillenpass</h2><span class="badge b-mute">aus IOM · nur lesen</span></div>${g?`<div class="muted small" style="margin-top:8px">Messung vom ${fmtDate(g.date)}</div>
           <table class="rx"><tr><th></th><th>Sph</th><th>Zyl</th><th>Achse</th><th>Add</th></tr>
-          <tr><td>R</td><td>${rxIn('R','sph')}</td><td>${rxIn('R','cyl')}</td><td>${rxIn('R','ax')}</td><td>${rxIn('R','add')}</td></tr>
-          <tr><td>L</td><td>${rxIn('L','sph')}</td><td>${rxIn('L','cyl')}</td><td>${rxIn('L','ax')}</td><td>${rxIn('L','add')}</td></tr></table>
-          <label class="f">Pupillendistanz (R/L)</label><input class="input" id="gPd" value="${esc(g.pd)}">
-          <label class="f">Vollkasko gültig bis</label><input class="input" type="date" id="gKasko" value="${g.kasko?g.kasko.until:''}">
-          <div class="row" style="margin-top:12px"><button class="btn accent" onclick="saveGlasses('${c.id}','${g.id}')">Speichern</button><button class="btn ghost" onclick="newGlasses('${c.id}')">Neue Messung</button></div>`
-          :`<p class="empty">Noch kein Brillenpass</p><button class="btn ghost" onclick="newGlasses('${c.id}')">Messung anlegen</button>`}</div>
-        <div class="card"><h2>Kontaktlinsen & Treuepass</h2>${L?`<div class="row"><b class="grow">${LENS_KIND[L.kind]||''}</b><span class="badge b-mute">${esc(L.wear)}</span></div>
-          <label class="f">Linsentyp</label><select class="input" onchange="setLensKind('${c.id}',this.value)">${Object.keys(LENS_KIND).map(k=>`<option value="${k}" ${k===L.kind?'selected':''}>${LENS_KIND[k]}</option>`).join('')}</select>
-          <div class="muted small" style="margin-top:8px">R: Sph ${esc(L.R.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.R.cyl)+' · A '+esc(L.R.ax):''} &nbsp; L: Sph ${esc(L.L.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.L.cyl)+' · A '+esc(L.L.ax):''}</div>`
-          :'<p class="muted">Keine Kontaktlinsen hinterlegt</p>'}
+          <tr><td>R</td><td>${rxV('R','sph')}</td><td>${rxV('R','cyl')}</td><td>${rxV('R','ax')}</td><td>${rxV('R','add')}</td></tr>
+          <tr><td>L</td><td>${rxV('L','sph')}</td><td>${rxV('L','cyl')}</td><td>${rxV('L','ax')}</td><td>${rxV('L','add')}</td></tr></table>
+          <div class="kvs" style="grid-template-columns:150px 1fr"><span>Pupillendistanz</span><b>${esc(g.pd||'–')} mm</b>
+          <span>Vollkasko</span><b>${ki?(ki.active?'<span style="color:var(--ok)">aktiv bis '+fmtDate(ki.until)+'</span>':'abgelaufen am '+fmtDate(ki.until)):'keine'}</b>
+          ${ki?`<span>Deckung</span><b>${esc(ki.cover)} · Selbstbehalt ${esc(ki.ded)}</b>`:''}</div>
+          <p class="muted small" style="margin-top:10px">Messwerte werden im IOM gepflegt und automatisch übernommen.</p>`
+          :`<p class="empty">Noch kein Brillenpass im IOM</p>`}</div>
+        <div class="card"><div class="row"><h2 class="grow" style="margin:0">Kontaktlinsen & Treuepass</h2></div>${L?`<div class="row" style="margin-top:8px"><b class="grow">${LENS_KIND[L.kind]||''}</b><span class="badge b-mute">${esc(L.wear)}</span></div>
+          <div class="muted small" style="margin-top:8px">R: Sph ${esc(L.R.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.R.cyl)+' · A '+esc(L.R.ax):''}${L.kind==='multifokal'?' · Add '+esc(L.R.add):''} &nbsp; L: Sph ${esc(L.L.sph)}${L.kind==='torisch'?' · Zyl '+esc(L.L.cyl)+' · A '+esc(L.L.ax):''}${L.kind==='multifokal'?' · Add '+esc(L.L.add):''}</div>
+          <p class="muted small" style="margin-top:6px">Linsenwerte aus dem IOM · nur lesen</p>`
+          :'<p class="muted" style="margin-top:8px">Keine Kontaktlinsen hinterlegt</p>'}
           ${c.parent?'':`<label class="f">Treuepunkte</label>`}<div class="row" style="${c.parent?'display:none':''}"><div class="stamps">${Array.from({length:Y.goal},(_,i)=>`<span class="stamp ${i<Y.points?'on':''}"></span>`).join('')}</div><span class="grow"></span>
           <button class="btn ghost sm" onclick="pts('${c.id}',-1)">−</button><button class="btn ghost sm" onclick="pts('${c.id}',1)">+1 Punkt</button></div>
           ${(Y.vouchers||[]).map(v=>`<div class="row" style="margin-top:8px;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:9px"><b class="grow" style="color:var(--accent)">🎁 ${esc(v.code)}</b><button class="btn accent sm" onclick="redeemV('${c.id}','${v.code}')">Einlösen</button></div>`).join('')}
@@ -712,7 +726,7 @@ function vStats(){
 /* --- Einstellungen --- */
 let setTab='stores', setStoreId=null;
 function vSettings(){
-  const tabs=[['stores','Filialen & Öffnungszeiten'],['tpl','Vorlagen & Textbausteine']].concat(isOwner()?[['brand','Marke & Logo']]:[]);
+  const tabs=[['stores','Filialen & Öffnungszeiten'],['tpl','Vorlagen & Textbausteine']].concat(isOwner()?[['kasko','Vollkasko'],['brand','Marke & Logo']]:[]);
   if(!tabs.find(x=>x[0]===setTab))setTab='stores';
   const head=`<div class="tabs">${tabs.map(x=>`<button class="${setTab===x[0]?'on':''}" onclick="setTab='${x[0]}';render()">${x[1]}</button>`).join('')}</div>`;
   if(setTab==='stores'){
@@ -745,6 +759,17 @@ function vSettings(){
       ${D.snippets.map((x,i)=>`<div class="row" style="margin-top:8px"><input class="input sI" value="${esc(x)}"><button class="x" onclick="D.snippets.splice(${i},1);saveD();render()">×</button></div>`).join('')}
       <div class="row" style="margin-top:12px;gap:8px"><button class="btn ghost" onclick="D.snippets.push('');saveD();render()">+ Textbaustein</button><span class="grow"></span><button class="btn accent" onclick="D.snippets=[...document.querySelectorAll('.sI')].map(i=>i.value.trim()).filter(Boolean);saveD();render();toast('Textbausteine gespeichert')">Speichern</button></div></div>`);
   }
+  if(setTab==='kasko'){
+    const k=kaskoCfg();
+    V(head+`<div class="grid two"><div class="card"><h2>Vollkasko-Bedingungen</h2>
+      <label class="f">Laufzeit ab Kaufdatum</label><select class="input" id="kM">${[6,12,24,36].map(m=>`<option value="${m}" ${+k.months===m?'selected':''}>${kaskoLabel(m)}</option>`).join('')}</select>
+      <label class="f">Deckung</label><select class="input" id="kC"><option value="glass" ${k.cover!=='all'?'selected':''}>Nur Brillengläser</option><option value="all" ${k.cover==='all'?'selected':''}>Brillengläser und Fassung</option></select>
+      <label class="f">Selbstbehalt in % vom Glaspreis</label><div class="row"><input class="input" id="kP" type="number" min="0" max="100" step="5" value="${k.pct}" style="width:120px"><span class="muted">%</span></div>
+      <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost" onclick="S=loadS();S.kaskoCfg=null;saveS();render();toast('Standard wiederhergestellt')">Standard (1 Jahr, nur Gläser, 30 %)</button><span class="grow"></span><button class="btn accent" onclick="saveKasko()">Speichern</button></div></div>
+      <div class="card"><h2>So wirkt es</h2><p>Die Bedingungen gelten für alle Brillen mit Vollkasko. In der App sehen Kunden Laufzeit, Deckung und Selbstbehalt im Brillenpass und in der Police.</p>
+      <p style="margin-top:8px">Meldet ein Kunde einen Schaden innerhalb der Laufzeit${k.cover!=='all'?' (bei „nur Gläser“: einen Glasschaden)':''}, fragt die App, ob die Vollkasko greifen soll.</p>
+      <p class="muted small" style="margin-top:10px">Beispiel: Gläser zu € 598,00 → Selbstbehalt ${eurK(598*k.pct/100)}</p></div></div>`);
+  }
   if(setTab==='brand'){
     const b=S.brand||{};
     V(head+`<div class="grid two"><div class="card"><h2>Marke</h2>
@@ -757,6 +782,7 @@ function vSettings(){
       <p class="muted small" style="margin-top:10px">Änderungen erscheinen sofort in der Kunden-App (im selben Browser).</p></div></div>`);
   }
 }
+function saveKasko(){S=loadS();S.kaskoCfg={months:+document.getElementById('kM').value,cover:document.getElementById('kC').value,pct:Math.max(0,Math.min(100,+document.getElementById('kP').value||0))};saveS();render();toast('Vollkasko-Bedingungen gespeichert – in der App sichtbar')}
 function parseHours(txt){return txt.split(',').map(x=>x.trim()).filter(Boolean).map(x=>{const star=x.endsWith('*');const m=x.replace('*','').match(/(\d{1,2}):?(\d{2})\s*[–-]\s*(\d{1,2}):?(\d{2})/);if(!m)return null;const r=[m[1].padStart(2,'0')+':'+m[2],m[3].padStart(2,'0')+':'+m[4]];if(star)r.push(1);return r}).filter(Boolean)}
 function storeCfgMut(id,fn){S=loadS();S.storeCfg=S.storeCfg||{};S.storeCfg[id]=S.storeCfg[id]||{};fn(S.storeCfg[id]);saveS();render()}
 function saveStore(id){const hours=[...document.querySelectorAll('.hIn')].map(i=>parseHours(i.value)), g=x=>document.getElementById(x).value.trim();
