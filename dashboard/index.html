@@ -159,7 +159,7 @@ table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--surf
     <div id="navList"></div>
     <div class="side-foot"><div class="sideuser"><span class="av" id="sideAv" style="width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700">T</span><div class="grow"><b id="sideName">–</b><div id="sideRole" class="small"></div></div></div>
       <button class="btn ghost sm" style="margin-top:10px;width:100%" onclick="logout()">Abmelden</button>
-      <div style="margin-top:10px">Dashboard-Prototyp v0.3<br>Alle Kundendaten sind Beispieldaten.</div></div>
+      <div style="margin-top:10px">Dashboard-Prototyp v0.4<br>Alle Kundendaten sind Beispieldaten.</div></div>
   </aside>
   <main>
     <div class="top">
@@ -234,7 +234,7 @@ const DEFAULT = {
   loyalty:{points:3,goal:5,reward:'Pflegemittel-Set gratis',vouchers:[]},
   appts:[{id:'a0',type:'Augenkontrolle',date:addDays(-1),time:'15:00',store:'perg',rated:false},
          {id:'a1',type:'Kontaktlinsen-Kontrolle',date:workday(9),time:'10:30',store:'perg'}],
-  tickets:[{id:'t2',kind:'Brillenauftrag',title:'Neue Gläser eingeschliffen',status:'Abholbereit',date:addDays(0)},
+  tickets:[{id:'t2',kind:'Brillenauftrag',title:'Neue Gläser eingeschliffen',status:'Abgeschlossen',date:addDays(0)},
            {id:'t1',kind:'Reparatur',title:'Nasenpad an Brille ersetzt',status:'Abgeschlossen',date:'2026-08-30'}],
   chat:[
     {id:'m1',from:'shop',store:'perg',text:'Willkommen bei Optik Falkner! Hier können Sie uns jederzeit schreiben – wir antworten während unserer Öffnungszeiten.',ts:'2026-08-20T09:15:00',read:true},
@@ -254,6 +254,8 @@ const NEWS=[
 const LENS_KIND={'sphärisch':'Sphärische Kontaktlinsen','torisch':'Torische Kontaktlinsen','multifokal':'Multifokale Kontaktlinsen'};
 const LENS_HINT={'sphärisch':'Korrigieren Kurz- oder Weitsichtigkeit','torisch':'Zusätzlich mit Hornhautverkrümmungs-Korrektur','multifokal':'Für Nähe und Ferne (Alterssichtigkeit)'};
 
+// Auftragsstatus: nur noch Offen / In Bearbeitung / Abgeschlossen
+const normStatus=s=>({'Eingegangen':'Offen','In Prüfung':'Offen','Wird bereitgelegt':'Offen','Versand vorbereitet':'Offen','In Arbeit':'In Bearbeitung','Abholbereit':'Abgeschlossen','Versendet':'Abgeschlossen'})[s]||s;
 
 
 /* ======== Speicher ======== */
@@ -261,10 +263,11 @@ const KEY='falkner-v10', DKEY='falkner-dash-v1';
 let S;
 function loadS(){let x=null;try{x=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   if(!x){x=JSON.parse(JSON.stringify(DEFAULT));x.store='perg';try{localStorage.setItem(KEY,JSON.stringify(x))}catch(e){}}
-  x.chat=x.chat||[];x.tickets=x.tickets||[];x.appts=x.appts||[];x.reviews=x.reviews||[];x.extraNews=x.extraNews||[];x.family=x.family||[];x.storeCfg=x.storeCfg||{};return x}
+  x.chat=x.chat||[];x.tickets=x.tickets||[];x.appts=x.appts||[];x.reviews=x.reviews||[];x.extraNews=x.extraNews||[];x.family=x.family||[];x.storeCfg=x.storeCfg||{};x.tickets.forEach(t=>t.status=normStatus(t.status));return x}
 function saveS(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 S=loadS();
 const STORES_BASE=JSON.parse(JSON.stringify(STORES));
+S.tickets.forEach(t=>t.status=normStatus(t.status));
 function applyStoreCfg(){Object.keys(STORES).forEach(id=>{Object.assign(STORES[id],JSON.parse(JSON.stringify(STORES_BASE[id])),(S.storeCfg||{})[id]||{})})}
 const hexA=(h,a)=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
 let LOGO_DEFAULT=null;
@@ -302,7 +305,7 @@ let D;
 try{D=JSON.parse(localStorage.getItem(DKEY))}catch(e){}
 if(!D)D=JSON.parse(JSON.stringify(DDEFAULT));
 function saveD(){try{localStorage.setItem(DKEY,JSON.stringify(D))}catch(e){}}
-D.customers.forEach((c,i)=>{if(!c.kdnr)c.kdnr=String(310400+i*37)});
+D.customers.forEach((c,i)=>{if(!c.kdnr)c.kdnr=String(310400+i*37);c.tickets.forEach(x=>x.status=normStatus(x.status))});
 const TPL_DEFAULT=[
   ['✅','Brille abholbereit','Ihre Brille ist bereit zur Abholung','Sie können Ihre Brille ab sofort in der Filiale {f} abholen.','hours'],
   ['✅','Linsen abholbereit','Ihre Kontaktlinsen sind abholbereit','Sie können die Linsen ab sofort in der Filiale {f} abholen.','hours'],
@@ -388,7 +391,9 @@ function render(){
   document.getElementById('userBox').innerHTML=`<span class="av">${ME.role==='owner'?'👑':initials(ME.name)}</span><span>${esc(ME.name)}</span>`;
   const unread=customers().filter(inFilter).reduce((n,c)=>n+unreadOf(c),0);
   const openOrders=allTickets().filter(t=>t.status!=='Abgeschlossen').length;
-  document.getElementById('navList').innerHTML=NAV.map(n=>`<button class="nav ${page===n[0]?'on':''}" onclick="go('${n[0]}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n[2]}</svg>${n[1]}${n[0]==='inbox'&&unread?`<span class="cnt">${unread}</span>`:''}${n[0]==='orders'&&openOrders?`<span class="cnt" style="background:var(--muted)">${openOrders}</span>`:''}</button>`).join('');
+  const OWNER_ONLY=['news','stats','settings'];
+  if(!isOwner()&&OWNER_ONLY.includes(page)) page='home';
+  document.getElementById('navList').innerHTML=NAV.filter(n=>isOwner()||!OWNER_ONLY.includes(n[0])).map(n=>`<button class="nav ${page===n[0]?'on':''}" onclick="go('${n[0]}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n[2]}</svg>${n[1]}${n[0]==='inbox'&&unread?`<span class="cnt">${unread}</span>`:''}${n[0]==='orders'&&openOrders?`<span class="cnt" style="background:var(--muted)">${openOrders}</span>`:''}</button>`).join('');
   document.getElementById('storeSeg').innerHTML=isOwner()?[['all','Alle Filialen'],['perg','Perg'],['dimbach','Dimbach']].map(x=>`<button class="${filter===x[0]?'on':''}" onclick="setFilter('${x[0]}')">${x[1]}</button>`).join(''):`<button class="on" style="cursor:default">Filiale ${storeName(ME.store)}</button>`;
   document.getElementById('pageTitle').textContent=NAV.find(n=>n[0]===page)[1];
   ({home:vHome,inbox:vInbox,orders:vOrders,appts:vAppts,customers:vCustomers,news:vNews,reviews:vReviews,stats:vStats,settings:vSettings})[page]();
@@ -398,12 +403,12 @@ function modal(title,html){document.getElementById('modalBox').innerHTML=`<div c
 function closeModal(){document.getElementById('modal').classList.remove('on')}
 const storeOptions=sel=>Object.values(STORES).filter(s=>isOwner()||s.id===ME.store).map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${esc(s.name)}</option>`).join('');
 const custName=c=>esc(c.name)+(c.live?'<span class="live">Live</span>':'');
-const statusBadge=s=>`<span class="badge ${({'Abgeschlossen':'b-ok','Abholbereit':'b-acc','In Arbeit':'b-info','In Prüfung':'b-warn','Eingegangen':'b-warn','Wird bereitgelegt':'b-info','Versand vorbereitet':'b-info','Versendet':'b-ok'})[s]||'b-mute'}">${esc(s)}</span>`;
+const statusBadge=s=>`<span class="badge ${({'Offen':'b-warn','In Bearbeitung':'b-info','Abgeschlossen':'b-ok','Abholbereit':'b-acc','In Arbeit':'b-info','In Prüfung':'b-warn','Eingegangen':'b-warn','Wird bereitgelegt':'b-info','Versand vorbereitet':'b-info','Versendet':'b-ok'})[s]||'b-mute'}">${esc(s)}</span>`;
 
 /* --- Übersicht --- */
 function vHome(){
   const cs=customers().filter(inFilter), unread=cs.reduce((n,c)=>n+unreadOf(c),0);
-  const open=allTickets().filter(t=>t.status!=='Abgeschlossen'), ready=open.filter(t=>t.status==='Abholbereit').length;
+  const open=allTickets().filter(t=>t.status!=='Abgeschlossen'), ready=open.filter(t=>t.status==='In Bearbeitung').length;
   const now=new Date(), td=new Date().toISOString().slice(0,10);
   const ap=allAppts().filter(a=>apptTime(a)>=new Date(td+'T00:00')).sort((a,b)=>apptTime(a)-apptTime(b));
   const tdA=ap.filter(a=>a.date===td).length;
@@ -411,7 +416,7 @@ function vHome(){
   const convs=cs.filter(c=>unreadOf(c)).map(c=>({c,m:c.chat.filter(m=>m.from==='me').slice(-1)[0]}));
   V(`<div class="grid kpis">
       <div class="card kpi" onclick="go('inbox')"><span>Ungelesene Nachrichten</span><b style="color:${unread?'var(--accent)':'inherit'}">${unread}</b></div>
-      <div class="card kpi" onclick="go('orders')"><span>Offene Aufträge</span><b>${open.length}</b><span>${ready} abholbereit</span></div>
+      <div class="card kpi" onclick="go('orders')"><span>Offene Aufträge</span><b>${open.length}</b><span>${ready} in Bearbeitung</span></div>
       <div class="card kpi" onclick="go('appts')"><span>Termine heute</span><b>${tdA}</b><span>${ap.length} in den nächsten Tagen</span></div>
       <div class="card kpi" onclick="go('reviews')"><span>Ø Bewertung</span><b>${avg?avg.toFixed(1).replace('.',','):'–'}</b><span class="stars">${avg?stars(Math.round(avg)):''}</span> <span>${rv.length} Bewertungen</span></div>
     </div>
@@ -466,13 +471,13 @@ function vInbox(){
 }
 
 /* --- Aufträge --- */
-const STATI=['Eingegangen','In Prüfung','In Arbeit','Abholbereit','Abgeschlossen'];
+const STATI=['Offen','In Bearbeitung','Abgeschlossen'];
 function ordersTable(list){
   if(!list.length) return '<p class="empty">Keine Aufträge</p>';
   return `<table class="t"><tr><th>Datum</th><th>Kunde</th><th>Art</th><th>Beschreibung</th><th>Filiale</th><th></th><th>Status</th></tr>${list.map(t=>`<tr class="click" onclick="if(event.target.tagName!=='SELECT'&&event.target.tagName!=='OPTION')orderDetail('${t.cust.id}','${t.id}')">
     <td>${fmtDate(t.date)}</td><td>${custName(t.cust)}</td><td>${esc(t.kind)}${t.kasko?' <span class="badge b-ok">Kasko</span>':''}</td><td>${esc(t.title)}</td><td>${storeName(t.cust.store)}</td>
     <td>${t.photos&&t.photos.length?`<span class="badge b-info">📷 ${t.photos.length}</span>`:''}</td>
-    <td><select class="input" style="width:auto;padding:5px 8px" onchange="setTicket('${t.cust.id}','${t.id}',this.value)">${[...new Set([t.status,...STATI])].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('')}</table>`;
+    <td><select class="input" style="width:auto;padding:5px 8px" onchange="setTicket('${t.cust.id}','${t.id}',this.value)">${STATI.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('')}</table>`;
 }
 function orderDetail(cid,tid){
   const c=cust(cid), t=c.tickets.find(x=>x.id===tid); if(!t)return;
@@ -486,20 +491,26 @@ function orderDetail(cid,tid){
     <div class="row" style="margin-top:16px;gap:8px"><button class="btn ghost" onclick="closeModal();go('inbox','${c.parent?'live':c.id}')">Kunden anschreiben</button><span class="grow"></span><button class="btn" onclick="closeModal()">Schließen</button></div>`);
 }
 function setTicket(cid,tid,status){
-  const c=cust(cid), notify=document.getElementById('notifyCust')?document.getElementById('notifyCust').checked:true;
-  mutate(cid,x=>{const t=x.tickets.find(t=>t.id===tid);if(!t)return;t.status=status;
-    if(notify&&(status==='Abholbereit'||status==='In Arbeit')){
-      const ready=status==='Abholbereit', f=storeName(x.store);
-      x.chat.push({id:uid('s'),from:'status',store:x.store,icon:ready?'✅':'🛠️',title:ready?(t.kind==='Bestellung'?'Ihre Bestellung ist abholbereit':'Ihre Brille ist bereit zur Abholung'):'Ihr Auftrag ist in Arbeit',
-        text:ready?`„${t.title}“ – Sie können ab sofort in der Filiale ${f} abholen.`:`Wir arbeiten an „${t.title}“ und melden uns, sobald alles fertig ist.`,ts:new Date().toISOString(),read:false,action:ready?['Öffnungszeiten',"go('store')"]:null});
+  const c=cust(cid), notify=document.getElementById('notifyCust')?document.getElementById('notifyCust').checked:true, done=status==='Abgeschlossen';
+  mutate(cid,x=>{const tk=x.tickets.find(t=>t.id===tid);if(!tk)return;tk.status=status;
+    if(notify&&done){
+      const f=storeName(x.store), repair=/Schaden|Kasko|Reparatur/.test(tk.kind), order=tk.kind==='Bestellung';
+      x.chat.push({id:uid('s'),from:'status',store:x.store,icon:repair?'🔧':'✅',
+        title:repair?'Reparatur abgeschlossen':order?'Ihre Bestellung ist abholbereit':'Ihre Brille ist bereit zur Abholung',
+        text:`„${tk.title}“ ist erledigt – Sie können ab sofort in der Filiale ${f} abholen.`,ts:new Date().toISOString(),read:false,action:['Öffnungszeiten',"go('store')"]});
     }});
-  toast('Status: '+status+(notify&&(status==='Abholbereit'||status==='In Arbeit')?' · Kunde benachrichtigt':''));
+  toast('Status: '+status+(notify&&done?' · Kunde benachrichtigt':''));
 }
-let ordFilter='open';
+let ordStatus='open', ordKind='all';
 function vOrders(){
-  const all=allTickets().sort((a,b)=>b.date.localeCompare(a.date)), list=ordFilter==='open'?all.filter(t=>t.status!=='Abgeschlossen'):all;
-  V(`<div class="card"><div class="row" style="margin-bottom:10px"><div class="seg" style="box-shadow:none;background:var(--surface-2)">${[['open','Offen'],['all','Alle']].map(x=>`<button class="${ordFilter===x[0]?'on':''}" onclick="ordFilter='${x[0]}';render()">${x[1]}</button>`).join('')}</div>
-    <span class="grow"></span><label class="row small" style="gap:6px"><input type="checkbox" id="notifyCust" checked> Kunde bei „In Arbeit“ / „Abholbereit“ automatisch benachrichtigen</label></div>
+  const base=allTickets().sort((a,b)=>b.date.localeCompare(a.date)), kinds=[...new Set(base.map(x=>x.kind))].sort();
+  if(ordKind!=='all'&&!kinds.includes(ordKind))ordKind='all';
+  const list=base.filter(x=>(ordStatus==='all'||(ordStatus==='open'?x.status!=='Abgeschlossen':x.status===ordStatus))&&(ordKind==='all'||x.kind===ordKind));
+  const cnt=st=>base.filter(x=>(ordKind==='all'||x.kind===ordKind)&&(st==='all'||(st==='open'?x.status!=='Abgeschlossen':x.status===st))).length;
+  V(`<div class="card"><div class="row" style="margin-bottom:12px;gap:10px;flex-wrap:wrap">
+      <div class="seg" style="box-shadow:none;background:var(--surface-2)">${[['open','Nicht erledigt'],['Offen','Offen'],['In Bearbeitung','In Bearbeitung'],['Abgeschlossen','Abgeschlossen'],['all','Alle']].map(x=>`<button class="${ordStatus===x[0]?'on':''}" onclick="ordStatus='${x[0]}';render()">${x[1]} <span class="muted small">${cnt(x[0])}</span></button>`).join('')}</div>
+      <select class="input" style="width:auto;padding:7px 10px" onchange="ordKind=this.value;render()"><option value="all">Alle Arten</option>${kinds.map(k=>`<option ${k===ordKind?'selected':''}>${esc(k)}</option>`).join('')}</select>
+      <span class="grow"></span><label class="row small" style="gap:6px"><input type="checkbox" id="notifyCust" checked> Kunde bei „Abgeschlossen“ automatisch benachrichtigen</label></div>
     ${ordersTable(list)}</div>`);
 }
 
