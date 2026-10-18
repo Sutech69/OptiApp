@@ -457,7 +457,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.1 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.2 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -812,7 +812,7 @@ function renderProfile(){
   ['First','Last','Mail','Phone','Addr'].forEach(k=>document.getElementById('p'+k).value=p[k.toLowerCase()]);
   const n=[['chat','Nachrichten der Filiale','z. B. „Brille abholbereit“'],['checkup','Sehtest-Erinnerung','Jährlich, bei Kindern halbjährlich'],['reminder','Kontaktlinsen-Erinnerung','Wenn Ihr Vorrat zur Neige geht'],['appt','Terminerinnerung','24 h vor Ihrem Termin'],['review','Bewertung nach Termin','Kurze Frage, wie Ihr Besuch war'],['offers','Angebote & News','Neuigkeiten Ihrer Filiale']];
   document.getElementById('notifCard').innerHTML=n.map(x=>`<div class="list-item"><div class="grow"><b>${x[1]}</b><div class="muted-s">${x[2]}</div></div><button class="toggle ${S.notif[x[0]]?'on':''}" onclick="toggleNotif('${x[0]}')" aria-label="${x[1]}"></button></div>`).join('');
-  document.getElementById('familyCard').innerHTML=`<p class="muted-s" style="margin-bottom:6px">Verwalten Sie Brillen- und Kontaktlinsenpass Ihrer Kinder in Ihrer App.</p>`+(S.family||[]).map(k=>`<div class="list-item"><span class="wav" style="width:36px;height:36px">${esc(k.first[0])}</span><div class="grow"><b>${esc(k.first)} ${esc(k.last)}</b><div class="muted-s">${esc(k.relation)}${k.birth?' · Jg. '+esc(k.birth):''} · ${k.glasses.length?'Brillenpass vorhanden':'noch keine Messwerte'}</div></div><button class="btn ghost" style="width:auto;padding:8px 12px" onclick="setWho('${k.id}');go('glasses')">Ansehen</button></div>`).join('')+
+  document.getElementById('familyCard').innerHTML=`<p class="muted-s" style="margin-bottom:6px">Verwalten Sie Brillen- und Kontaktlinsenpass Ihrer Kinder in Ihrer App.</p>`+(S.family||[]).map(k=>`<div class="list-item"><span class="wav" style="width:36px;height:36px">${esc(k.first[0])}</span><div class="grow"><b>${esc(k.first)} ${esc(k.last)}</b><div class="muted-s">${esc(k.relation)}${k.birth?' · Jg. '+esc(k.birth):''} · ${k.glasses.length?'Brillenpass vorhanden':'noch keine Messwerte'}</div></div><button class="btn ghost" style="width:auto;padding:8px 12px" onclick="setWho('${k.id}');go('glasses')">Ansehen</button><button class="btn ghost" style="width:auto;padding:8px 11px;margin-left:6px;color:var(--danger)" onclick="openSheet('famDel','${k.id}')" aria-label="${esc(k.first)} entfernen">Entfernen</button></div>`).join('')+
     `<button class="btn ghost" style="margin-top:12px" onclick="openSheet('family')">+ Familienmitglied hinzufügen</button>`;
   document.getElementById('kdnrLine').textContent='Kundennr. '+(S.profile.kdnr||'–').replace(/(\d{3})(?=\d)/,'$1 ')+' · Optik Falkner';
   const u=S.ui;
@@ -977,7 +977,7 @@ function autoReply(text){
 /* ===================== Bottom Sheets ===================== */
 const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
 function openSheet(kind,arg){
-  ({news:sheetNews,docs:sheetDocs,onbStore:sheetStore,family:sheetFamily,damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate,legal:sheetLegal})[kind](arg);
+  ({news:sheetNews,docs:sheetDocs,onbStore:sheetStore,family:sheetFamily,damage:sheetDamage,kasko:sheetKasko,order:sheetOrder,book:sheetBook,store:sheetStore,stock:sheetStock,rate:sheetRate,legal:sheetLegal,famDel:sheetFamDel})[kind](arg);
   sheet.classList.add('on');scrim.classList.add('on');
 }
 function closeSheet(){sheet.classList.remove('on');scrim.classList.remove('on')}
@@ -1142,6 +1142,21 @@ function saveFamily(){
   S.family=S.family||[];S.family.push(m);persist();
   setTimeout(()=>addMsg({from:'status',icon:'👨‍👧',title:'Familienmitglied hinzugefügt',text:`${first} wurde mit Ihrem Konto verknüpft. Wir tragen die Messwerte beim nächsten Besuch in der Filiale ein.`,action:['Termin buchen',"openSheet('book')"]},false),0);
   successView('Hinzugefügt',`${esc(first)} ist jetzt mit Ihrem Konto verknüpft. Oben im Brillen- und Kontaktlinsenpass können Sie zwischen den Personen wechseln.`);
+}
+
+function sheetFamDel(id){
+  const k=(S.family||[]).find(x=>x.id===id); if(!k){closeSheet();return}
+  setSheet('Familienmitglied entfernen',`
+    <p class="sub"><b>${esc(k.first)} ${esc(k.last)}</b> (${esc(k.relation)}) wird von Ihrem Konto getrennt.</p>
+    <div class="card" style="background:var(--surface-2);box-shadow:none;margin-top:14px"><p class="muted-s">Brillen- und Kontaktlinsenpass von ${esc(k.first)} sind danach in Ihrer App nicht mehr sichtbar. Die Daten in der Filiale bleiben erhalten – Sie können ${esc(k.first)} jederzeit wieder hinzufügen.</p></div>
+    <button class="btn accent" style="margin-top:18px;background:var(--danger)" onclick="removeFamily('${k.id}')">Ja, entfernen</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="closeSheet()">Abbrechen</button>`);
+}
+function removeFamily(id){
+  const k=(S.family||[]).find(x=>x.id===id); if(!k)return;
+  S.family=S.family.filter(x=>x.id!==id); if(S.who===id)S.who='me'; persist();
+  addMsg({from:'status',icon:'👨‍👧',title:'Familienmitglied entfernt',text:`${k.first} ist nicht mehr mit Ihrem Konto verknüpft.`});
+  closeSheet(); render(); toast(k.first+' wurde entfernt');
 }
 
 /* --- Vorrat bearbeiten --- */

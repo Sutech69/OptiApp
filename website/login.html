@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kunden-Login – OptiApp</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="site.css">
+<style>
+  body{min-height:100vh;display:flex;flex-direction:column}
+  .login{flex:1;display:grid;place-items:center;padding:48px 16px}
+  .box{width:min(440px,100%)}
+  .box h1{font-size:clamp(34px,6vw,46px);font-weight:760;letter-spacing:-.02em}
+  .box>p{color:var(--muted)}
+  .form{margin-top:26px;box-shadow:0 24px 48px -32px rgba(23,34,53,.5);border:1px solid var(--line)}
+  .row2{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:15px}
+  .row2 label{display:flex;gap:8px;align-items:center;font-weight:400;margin:0}
+  .row2 input{width:auto}
+  .demo{margin-top:22px;padding:16px 18px;border:2px dashed var(--line);border-radius:14px;font-size:15px}
+  .demo b{display:block;margin-bottom:6px}
+  .demo button{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:12px;width:100%;padding:7px 0;border-top:1px solid var(--line)}
+  .demo button:first-of-type{border-top:0}
+  .demo button span:last-child{color:var(--muted)}
+  .demo button:hover span:first-child,.demo button:focus-visible span:first-child{color:var(--lens);text-decoration:underline}
+  .eye{all:unset;cursor:pointer;font-size:14px;color:var(--lens);font-weight:700;float:right;margin-top:-37px;margin-right:14px;position:relative}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="./" aria-label="OptiApp Startseite"><span class="logo-ph" title="Platzhalter – Logo folgt">Logo</span><span class="word">OptiApp</span></a>
+    <a class="btn btn-ghost" style="padding:10px 18px;font-size:16px;margin-left:auto" href="./">Zur Startseite</a>
+  </div>
+</header>
+<main class="login">
+  <div class="box">
+    <h1>Kunden-Login</h1>
+    <p>Melden Sie sich mit Ihrem OptiApp-Zugang an, um ins Dashboard Ihres Geschäfts zu gelangen.</p>
+    <form class="form" id="lf" novalidate>
+      <label for="lMail">E-Mail</label><input id="lMail" type="email" autocomplete="username" required>
+      <label for="lPw">Passwort</label><input id="lPw" type="password" autocomplete="current-password" required>
+      <button type="button" class="eye" id="eye" aria-controls="lPw">Anzeigen</button>
+      <div class="row2"><span></span><a href="#" id="forgot">Passwort vergessen?</a></div>
+      <p class="err" id="lErr" role="alert"></p>
+      <button class="btn btn-solid" type="submit">Anmelden</button>
+    </form>
+    <div class="demo">
+      <b>Demo-Zugänge (Prototyp) – Passwort jeweils „demo“</b>
+      <button type="button" data-u="inhaber@optik-falkner.at"><span>inhaber@optik-falkner.at</span><span>alle Filialen</span></button>
+      <button type="button" data-u="perg@optik-falkner.at"><span>perg@optik-falkner.at</span><span>Filiale Perg</span></button>
+      <button type="button" data-u="dimbach@optik-falkner.at"><span>dimbach@optik-falkner.at</span><span>Filiale Dimbach</span></button>
+    </div>
+  </div>
+</main>
+<footer class="foot"><div class="wrap foot-in"><span class="brand small"><span class="logo-ph">Logo</span><span class="word">OptiApp</span></span><span class="grow"></span><a href="rechtliches.html#impressum">Impressum</a><a href="rechtliches.html#datenschutz">Datenschutz</a></div></footer>
+<script>
+// Prototyp: Demo-Zugänge statt echter Anmeldung. Später prüft ein Server Passwort und Zwei-Faktor-Code.
+const ACCOUNTS={'inhaber@optik-falkner.at':'owner','perg@optik-falkner.at':'perg','dimbach@optik-falkner.at':'dimbach'};
+const $=id=>document.getElementById(id), err=$('lErr');
+document.querySelectorAll('.demo button').forEach(b=>b.onclick=()=>{$('lMail').value=b.dataset.u;$('lPw').value='demo';$('lPw').focus()});
+$('eye').onclick=()=>{const p=$('lPw'),show=p.type==='password';p.type=show?'text':'password';$('eye').textContent=show?'Verbergen':'Anzeigen'};
+$('forgot').onclick=e=>{e.preventDefault();err.style.color='var(--muted)';err.textContent='Im Prototyp nicht verfügbar. Später kommt hier ein Link per E-Mail.'};
+$('lf').onsubmit=e=>{e.preventDefault();err.style.color='';
+  const m=$('lMail').value.trim().toLowerCase(), pw=$('lPw').value;
+  if(!m||!pw){err.textContent='Bitte E-Mail und Passwort eingeben.';(!m?$('lMail'):$('lPw')).focus();return}
+  if(!ACCOUNTS[m]||pw!=='demo'){err.textContent='E-Mail oder Passwort stimmt nicht. Im Prototyp: einen Demo-Zugang unten wählen.';$('lPw').select();return}
+  try{sessionStorage.setItem('falkner-dash-user',ACCOUNTS[m]);sessionStorage.setItem('optiapp-web','1')}catch(x){}
+  location.href='../dashboard/';
+};
+</script>
+</body>
+</html>
