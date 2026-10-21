@@ -49,13 +49,14 @@
       <button type="button" data-u="inhaber@optik-falkner.at"><span>inhaber@optik-falkner.at</span><span>alle Filialen</span></button>
       <button type="button" data-u="perg@optik-falkner.at"><span>perg@optik-falkner.at</span><span>Filiale Perg</span></button>
       <button type="button" data-u="dimbach@optik-falkner.at"><span>dimbach@optik-falkner.at</span><span>Filiale Dimbach</span></button>
+      <button type="button" data-u="admin@optiapp.at"><span>admin@optiapp.at</span><span>OptiApp-Verwaltung</span></button>
     </div>
   </div>
 </main>
 <footer class="foot"><div class="wrap foot-in"><span class="brand small"><span class="logo-ph">Logo</span><span class="word">OptiApp</span></span><span class="grow"></span><a href="rechtliches.html#impressum">Impressum</a><a href="rechtliches.html#datenschutz">Datenschutz</a></div></footer>
 <script>
 // Prototyp: Demo-Zugänge statt echter Anmeldung. Später prüft ein Server Passwort und Zwei-Faktor-Code.
-const ACCOUNTS={'inhaber@optik-falkner.at':'owner','perg@optik-falkner.at':'perg','dimbach@optik-falkner.at':'dimbach'};
+const ACCOUNTS={'admin@optiapp.at':'admin','inhaber@optik-falkner.at':'owner','perg@optik-falkner.at':'perg','dimbach@optik-falkner.at':'dimbach'};
 const $=id=>document.getElementById(id), err=$('lErr');
 document.querySelectorAll('.demo button').forEach(b=>b.onclick=()=>{$('lMail').value=b.dataset.u;$('lPw').value='demo';$('lPw').focus()});
 $('eye').onclick=()=>{const p=$('lPw'),show=p.type==='password';p.type=show?'text':'password';$('eye').textContent=show?'Verbergen':'Anzeigen'};
@@ -64,6 +65,7 @@ $('lf').onsubmit=e=>{e.preventDefault();err.style.color='';
   const m=$('lMail').value.trim().toLowerCase(), pw=$('lPw').value;
   if(!m||!pw){err.textContent='Bitte E-Mail und Passwort eingeben.';(!m?$('lMail'):$('lPw')).focus();return}
   if(!ACCOUNTS[m]||pw!=='demo'){err.textContent='E-Mail oder Passwort stimmt nicht. Im Prototyp: einen Demo-Zugang unten wählen.';$('lPw').select();return}
+  if(ACCOUNTS[m]==='admin'){try{sessionStorage.setItem('optiapp-admin','1')}catch(x){}location.href='../admin/';return}
   try{sessionStorage.setItem('falkner-dash-user',ACCOUNTS[m]);sessionStorage.setItem('optiapp-web','1')}catch(x){}
   location.href='../dashboard/';
 };
