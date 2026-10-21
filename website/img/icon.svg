@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>OptiApp App-Icon</title>
+  <rect width="512" height="512" rx="112" fill="#F0643C"/>
+  <circle cx="266.00" cy="244.00" r="150.00" fill="#FFFFFF"/>
+  <path d="M136.10 319.00 Q137.00 361.00 119.00 394.00 Q191.00 397.00 239.95 391.72 Z" fill="#FFFFFF"/>
+  <circle cx="209.00" cy="250.00" r="45.00" fill="none" stroke="#F0643C" stroke-width="18.00" stroke-linecap="round"/>
+  <circle cx="323.00" cy="250.00" r="45.00" fill="none" stroke="#F0643C" stroke-width="18.00" stroke-linecap="round"/>
+  <path d="M254.00 243.25 Q266.00 216.25 278.00 243.25" fill="none" stroke="#F0643C" stroke-width="18.00" stroke-linecap="round"/>
+</svg>
