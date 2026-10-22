@@ -105,6 +105,11 @@ tbody tr:hover td,tbody tr[aria-selected="true"] td{background:var(--surface-2)}
 .mbar .btn{background:var(--surface)}
 .mwrap{width:100%;max-width:820px}
 .paper{background:#fff;color:#172235;border-radius:6px;padding:48px 52px;font:400 14.5px/1.5 var(--text);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.paper tr:hover td,.paper tbody tr:hover td{background:none!important}.paper tr{cursor:default}
+.ff{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;margin-top:14px}.ff label{display:block;font-size:13.5px;font-weight:700;color:var(--muted);margin-bottom:4px}.ff .wide{grid-column:1/-1}
+.txt{width:100%;font:inherit;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}.txt:focus{border-color:var(--lens);outline:none}.txt.miss{background:var(--warn-bg);border-color:#E9C46A}
+.saved{font-size:13px;color:var(--ok);font-weight:700;margin-left:8px;opacity:0;transition:opacity .2s}.saved.on{opacity:1}
+@media (max-width:640px){.ff{grid-template-columns:1fr}}
 .paper h1{font:760 30px/1 var(--display);letter-spacing:-.02em;margin:0}
 .paper .ph{background:#FFF1A8;padding:0 3px;border-radius:3px}
 .p-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
@@ -134,7 +139,7 @@ tbody tr:hover td,tbody tr[aria-selected="true"] td{background:var(--surface-2)}
   <path d="M150.03 189.61 Q158.73 170.04 167.43 189.61" fill="none" stroke="#FFFFFF" stroke-width="13.05" stroke-linecap="round"/>
   <path d="M316.18216000000007 203.1006Q316.18216000000007 182.7006 325.68216000000007 166.5006Q335.18216000000007 150.30059999999997 351.4821600000001 141.20059999999998Q367.7821600000001 132.1006 387.18216000000007 132.1006Q406.7821600000001 132.1006 423.0821600000001 141.20059999999998Q439.3821600000001 150.30059999999997 448.7821600000001 166.5006Q458.18216000000007 182.7006 458.18216000000007 203.1006Q458.18216000000007 223.5006 448.7821600000001 239.80059999999997Q439.3821600000001 256.1006 423.0821600000001 265.2006Q406.7821600000001 274.3006 387.18216000000007 274.3006Q367.7821600000001 274.3006 351.4821600000001 265.2006Q335.18216000000007 256.1006 325.68216000000007 239.80059999999997Q316.18216000000007 223.5006 316.18216000000007 203.1006ZM434.7821600000001 203.1006Q434.7821600000001 187.7006 428.68216000000007 176.1006Q422.5821600000001 164.5006 411.7821600000001 158.30059999999997Q400.9821600000001 152.1006 387.18216000000007 152.1006Q373.3821600000001 152.1006 362.5821600000001 158.30059999999997Q351.7821600000001 164.5006 345.68216000000007 176.1006Q339.5821600000001 187.7006 339.5821600000001 203.1006Q339.5821600000001 218.5006 345.68216000000007 230.2006Q351.7821600000001 241.9006 362.5821600000001 248.2006Q373.3821600000001 254.5006 387.18216000000007 254.5006Q400.9821600000001 254.5006 411.7821600000001 248.2006Q422.5821600000001 241.9006 428.68216000000007 230.2006Q434.7821600000001 218.5006 434.7821600000001 203.1006ZM540.9821600000001 160.9006Q555.3821600000001 160.9006 567.2821600000001 168.0006Q579.1821600000001 175.1006 585.98216 187.9006Q592.7821600000001 200.7006 592.7821600000001 217.3006Q592.7821600000001 233.9006 585.98216 247.0006Q579.1821600000001 260.1006 567.2821600000001 267.4006Q555.3821600000001 274.7006 540.9821600000001 274.7006Q528.3821600000001 274.7006 518.5821600000002 269.6006Q508.7821600000001 264.5006 502.5821600000001 256.9006V325.30060000000003H479.7821600000001V162.7006H502.5821600000001V178.9006Q508.3821600000001 171.30059999999997 518.3821600000001 166.1006Q528.3821600000001 160.9006 540.9821600000001 160.9006ZM535.9821600000001 180.7006Q527.3821600000001 180.7006 519.6821600000001 185.1006Q511.9821600000001 189.5006 507.2821600000001 197.9006Q502.5821600000001 206.30059999999997 502.5821600000001 217.7006Q502.5821600000001 229.1006 507.2821600000001 237.6006Q511.9821600000001 246.1006 519.6821600000001 250.5006Q527.3821600000001 254.9006 535.9821600000001 254.9006Q544.7821600000001 254.9006 552.48216 250.4006Q560.1821600000001 245.9006 564.8821600000001 237.3006Q569.5821600000002 228.7006 569.5821600000002 217.3006Q569.5821600000002 205.9006 564.8821600000001 197.6006Q560.1821600000001 189.30059999999997 552.48216 185.0006Q544.7821600000001 180.7006 535.9821600000001 180.7006ZM641.1821600000002 181.30059999999997V242.3006Q641.1821600000002 248.5006 644.0821600000002 251.2006Q646.9821600000001 253.9006 653.9821600000001 253.9006H667.9821600000001V272.9006H649.9821600000001Q634.5821600000002 272.9006 626.3821600000001 265.7006Q618.1821600000002 258.5006 618.1821600000002 242.3006V181.30059999999997H605.1821600000002V162.7006H618.1821600000002V135.3006H641.1821600000002V162.7006H667.9821600000001V181.30059999999997ZM685.1821600000001 133.5006Q685.1821600000001 127.3006 689.3821600000001 123.1006Q693.58216 118.9006 699.7821600000001 118.9006Q705.7821600000001 118.9006 709.98216 123.1006Q714.1821600000001 127.3006 714.1821600000001 133.5006Q714.1821600000001 139.70059999999998 709.98216 143.9006Q705.7821600000001 148.1006 699.7821600000001 148.1006Q693.58216 148.1006 689.3821600000001 143.9006Q685.1821600000001 139.70059999999998 685.1821600000001 133.5006ZM710.98216 162.7006V272.9006H688.1821600000001V162.7006ZM823.98216 244.5006H765.7821600000001L755.7821600000001 272.9006H731.98216L781.7821600000001 133.70059999999998H808.1821600000001L857.98216 272.9006H833.98216ZM817.58216 225.9006 794.98216 161.30059999999997 772.1821600000001 225.9006ZM939.9821600000001 160.9006Q954.3821600000001 160.9006 966.2821600000001 168.0006Q978.1821600000001 175.1006 984.98216 187.9006Q991.7821600000001 200.7006 991.7821600000001 217.3006Q991.7821600000001 233.9006 984.98216 247.0006Q978.1821600000001 260.1006 966.2821600000001 267.4006Q954.3821600000001 274.7006 939.9821600000001 274.7006Q927.3821600000001 274.7006 917.5821600000002 269.6006Q907.7821600000001 264.5006 901.58216 256.9006V325.30060000000003H878.7821600000001V162.7006H901.58216V178.9006Q907.3821600000001 171.30059999999997 917.3821600000001 166.1006Q927.3821600000001 160.9006 939.9821600000001 160.9006ZM934.9821600000001 180.7006Q926.3821600000001 180.7006 918.6821600000001 185.1006Q910.9821600000001 189.5006 906.2821600000001 197.9006Q901.58216 206.30059999999997 901.58216 217.7006Q901.58216 229.1006 906.2821600000001 237.6006Q910.9821600000001 246.1006 918.6821600000001 250.5006Q926.3821600000001 254.9006 934.9821600000001 254.9006Q943.7821600000001 254.9006 951.48216 250.4006Q959.1821600000001 245.9006 963.8821600000001 237.3006Q968.5821600000002 228.7006 968.5821600000002 217.3006Q968.5821600000002 205.9006 963.8821600000001 197.6006Q959.1821600000001 189.30059999999997 951.48216 185.0006Q943.7821600000001 180.7006 934.9821600000001 180.7006ZM1074.7821600000002 160.9006Q1089.18216 160.9006 1101.0821600000002 168.0006Q1112.9821600000002 175.1006 1119.7821600000002 187.9006Q1126.5821600000002 200.7006 1126.5821600000002 217.3006Q1126.5821600000002 233.9006 1119.7821600000002 247.0006Q1112.9821600000002 260.1006 1101.0821600000002 267.4006Q1089.18216 274.7006 1074.7821600000002 274.7006Q1062.18216 274.7006 1052.38216 269.6006Q1042.5821600000002 264.5006 1036.38216 256.9006V325.30060000000003H1013.5821600000002V162.7006H1036.38216V178.9006Q1042.18216 171.30059999999997 1052.18216 166.1006Q1062.18216 160.9006 1074.7821600000002 160.9006ZM1069.7821600000002 180.7006Q1061.18216 180.7006 1053.48216 185.1006Q1045.7821600000002 189.5006 1041.0821600000002 197.9006Q1036.38216 206.30059999999997 1036.38216 217.7006Q1036.38216 229.1006 1041.0821600000002 237.6006Q1045.7821600000002 246.1006 1053.48216 250.5006Q1061.18216 254.9006 1069.7821600000002 254.9006Q1078.5821600000002 254.9006 1086.2821600000002 250.4006Q1093.9821600000002 245.9006 1098.6821600000003 237.3006Q1103.38216 228.7006 1103.38216 217.3006Q1103.38216 205.9006 1098.6821600000003 197.6006Q1093.9821600000002 189.30059999999997 1086.2821600000002 185.0006Q1078.5821600000002 180.7006 1069.7821600000002 180.7006Z" fill="currentColor"/>
 </svg><span class="tag">Verwaltung</span>
-  <nav class="nav" aria-label="Bereiche"><button data-v="optiker" onclick="go('optiker')">Optiker</button><button data-v="rechnungen" onclick="go('rechnungen')">Rechnungen</button></nav>
+  <nav class="nav" aria-label="Bereiche"><button data-v="optiker" onclick="go('optiker')">Optiker</button><button data-v="rechnungen" onclick="go('rechnungen')">Rechnungen</button><button data-v="firma" onclick="go('firma')">Firmendaten</button></nav>
   <span class="grow"></span><button class="btn" onclick="logout()">Abmelden</button>
 </div></header>
 <main class="main" id="app"></main>
@@ -297,8 +302,13 @@ function colChart(id,labels,vals,long){
 /* Abrechnung monatlich: Grundgebühr je Filiale + Gebühr je registriertem Endkunden (Bestand am Monatsende). Beträge netto, zzgl. 20 % USt.
    Prototyp: Tarife und Rechnungen liegen im Browser (localStorage). */
 const BKEY='optiapp-billing-v1', VAT=.2;
-let B={tariffs:{},invoices:[],seq:{}}, view='optiker', per=10, flash=null;
+let B={tariffs:{},invoices:[],seq:{},company:{},addr:{}}, view='optiker', per=10, flash=null;
 try{const x=JSON.parse(localStorage.getItem(BKEY));if(x&&x.tariffs)B=Object.assign(B,x)}catch(e){}
+const CO_FIELDS=[['name','Firmenname','OptiApp GmbH'],['suffix','Zusatz (z. B. in Gründung)','in Gründung'],['street','Straße und Hausnummer',''],['city','PLZ und Ort',''],['country','Land','Österreich'],['email','E-Mail','office@optiapp.at'],['web','Website','optiapp.at'],['uid','UID-Nummer',''],['fn','Firmenbuchnummer',''],['court','Firmenbuchgericht',''],['bank','Bank',''],['iban','IBAN',''],['bic','BIC',''],['due','Zahlungsziel in Tagen','14']];
+const CO_REQ=['street','city','uid','iban','bic','fn'];
+const co=k=>{const v=B.company[k];if(v!==undefined)return v;const f=CO_FIELDS.find(x=>x[0]===k);return f?f[2]:''};
+const adr=id=>B.addr[id]||{street:'',city:'',uid:''};
+const ph=(v,label)=>v?esc(v):`<span class="ph">${esc(label)}</span>`;
 function saveB(){try{localStorage.setItem(BKEY,JSON.stringify(B))}catch(e){}}
 const eur=n=>n.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
 const eur4=n=>n.toLocaleString('de-AT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:4});
@@ -311,7 +321,7 @@ const fmtD=d=>new Date(d).toLocaleDateString('de-AT',{day:'2-digit',month:'2-dig
 const custAt=(o,i)=>o.reg.slice(0,i+1).reduce((a,b)=>a+b,0);
 const startIdx=o=>11+o.since;
 function parseMoney(v){v=String(v).trim().replace(/\s|€/g,'');if(v.indexOf(',')>-1)v=v.replace(/\./g,'').replace(',','.');const n=parseFloat(v);return isFinite(n)&&n>=0?Math.round(n*10000)/10000:0}
-function setTariff(id,k,el){const t=Object.assign({},tariff(id));t[k]=parseMoney(el.value);B.tariffs[id]=t;saveB();el.value=fmtIn(t[k]);renderInv(true)}
+function setTariff(id,k,el){const t=Object.assign({},tariff(id));t[k]=parseMoney(el.value);B.tariffs[id]=t;saveB();el.value=fmtIn(t[k]);setTimeout(()=>renderInv(true),0)}
 function invFor(id,pk){return B.invoices.find(v=>v.opt===id&&v.period===pk&&!v.storno)}
 // Prüft, ob für Optiker o im Monat i eine Rechnung erstellt werden kann
 function billable(o,i){
@@ -329,7 +339,7 @@ function createInv(id,silent){
   const o=OPT.find(x=>x.id===id),why=billable(o,per); if(why){if(!silent){flash=['warn',o.name+': '+why];renderInv()}return null}
   const y=MONTHS[per].getFullYear(); B.seq[y]=(B.seq[y]||0)+1;
   const c=calc(o,per), inv={nr:'OA-'+y+'-'+String(B.seq[y]).padStart(4,'0'),date:new Date().toISOString(),opt:id,optName:o.name,period:periodKey(per),periodTxt:mLong(MONTHS[per]),
-    due:new Date(Date.now()+14*864e5).toISOString(),lines:c.lines,net:c.net,vat:c.vat,gross:c.gross,demo:!o.live};
+    due:new Date(Date.now()+(parseInt(co('due'))||14)*864e5).toISOString(),from:Object.fromEntries(CO_FIELDS.map(f=>[f[0],co(f[0])])),to:Object.assign({},adr(id)),lines:c.lines,net:c.net,vat:c.vat,gross:c.gross,demo:!o.live};
   B.invoices.unshift(inv);saveB();
   if(!silent){flash=['ok','Rechnung '+inv.nr+' für '+o.name+' erstellt.'];renderInv();openInv(inv.nr)}
   return inv;
@@ -343,14 +353,39 @@ function createAll(){
 function stornoInv(nr){const v=B.invoices.find(x=>x.nr===nr);if(!v||v.storno)return;if(!confirmStorno(nr))return;v.storno=new Date().toISOString();saveB();flash=['ok','Rechnung '+nr+' storniert. Für '+v.optName+' kann jetzt eine neue Rechnung erstellt werden.'];renderInv()}
 let stornoArm=null;function confirmStorno(nr){if(stornoArm===nr){stornoArm=null;return true}stornoArm=nr;renderInv(true);return false}
 function invHTML(v){
-  return `<div class="paper"><div class="p-top"><div>${LOGO_SVG}</div><div class="p-from"><b style="color:#172235">OptiApp GmbH</b> <span class="ph">(in Gründung)</span><br><span class="ph">Straße Hausnummer</span><br><span class="ph">PLZ Ort</span>, Österreich<br>office@optiapp.at · optiapp.at<br>UID: <span class="ph">ATU________</span></div></div>
-  <div class="p-addr"><div><div style="font-size:12px;color:#566273">Rechnung an</div><b>${esc(v.optName)}</b>${v.demo?' <span class="ph">Demo</span>':''}<br><span class="ph">Rechnungsadresse</span><br><span class="ph">PLZ Ort</span></div>
+  const F=v.from||Object.fromEntries(CO_FIELDS.map(f=>[f[0],co(f[0])])), T=v.to||adr(v.opt), g=k=>F[k]||'';
+  return `<div class="paper"><div class="p-top"><div>${LOGO_SVG}</div><div class="p-from"><b style="color:#172235">${ph(g('name'),'Firmenname')}</b>${g('suffix')?' ('+esc(g('suffix'))+')':''}<br>${ph(g('street'),'Straße Hausnummer')}<br>${ph(g('city'),'PLZ Ort')}${g('country')?', '+esc(g('country')):''}<br>${[g('email'),g('web')].filter(Boolean).map(esc).join(' · ')}<br>UID: ${ph(g('uid'),'ATU________')}</div></div>
+  <div class="p-addr"><div><div style="font-size:12px;color:#566273">Rechnung an</div><b>${esc(v.optName)}</b>${v.demo?' <span class="ph">Demo</span>':''}<br>${ph(T.street,'Rechnungsadresse')}<br>${ph(T.city,'PLZ Ort')}${T.uid?'<br>UID: '+esc(T.uid):''}</div>
     <table class="p-meta"><tr><td>Rechnungsnummer</td><td><b>${v.nr}</b></td></tr><tr><td>Rechnungsdatum</td><td>${fmtD(v.date)}</td></tr><tr><td>Leistungszeitraum</td><td>${v.periodTxt}</td></tr><tr><td>Fällig am</td><td>${fmtD(v.due)}</td></tr></table></div>
   <h1 style="margin-top:34px">Rechnung</h1>${v.storno?`<div class="storno">STORNIERT am ${fmtD(v.storno)}</div>`:''}
   <table class="p-lines"><thead><tr><th>Leistung</th><th class="num">Menge</th><th class="num">Einzelpreis</th><th class="num">Betrag</th></tr></thead><tbody>
     ${v.lines.map(l=>`<tr><td>${esc(l.txt)}<div style="font-size:12.5px;color:#566273">${esc(l.sub)}</div></td><td class="num">${nf(l.qty)}</td><td class="num">${eur4(l.unit)}</td><td class="num">${eur(l.sum)}</td></tr>`).join('')}</tbody></table>
   <table class="p-sum"><tr><td>Summe netto</td><td class="num">${eur(v.net)}</td></tr><tr><td>zzgl. 20 % USt.</td><td class="num">${eur(v.vat)}</td></tr><tr class="tot"><td>Gesamtbetrag</td><td class="num">${eur(v.gross)}</td></tr></table>
-  <div class="p-foot">Bitte überweisen Sie den Betrag bis ${fmtD(v.due)} unter Angabe der Rechnungsnummer ${v.nr}.<br>IBAN: <span class="ph">AT__ ____ ____ ____ ____</span> · BIC: <span class="ph">________</span> · Firmenbuch: <span class="ph">FN ______</span></div></div>`;
+  <div class="p-foot">Bitte überweisen Sie den Betrag bis ${fmtD(v.due)} unter Angabe der Rechnungsnummer ${v.nr}.<br>${g('bank')?esc(g('bank'))+' · ':''}IBAN: ${ph(g('iban'),'AT__ ____ ____ ____ ____')} · BIC: ${ph(g('bic'),'________')}<br>Firmenbuch: ${ph(g('fn'),'FN ______')}${g('court')?', '+esc(g('court')):''}</div></div>`;
+}
+/* ---------- Firmendaten (Absender) und Rechnungsadressen ---------- */
+let savedT=null;
+function flashSaved(){const el=document.getElementById('savedMsg');if(!el)return;el.classList.add('on');clearTimeout(savedT);savedT=setTimeout(()=>el.classList.remove('on'),1400)}
+function setCo(k,el){B.company[k]=el.value.trim();if(k==='iban')B.company[k]=B.company[k].toUpperCase().replace(/\s+/g,'').replace(/(.{4})/g,'$1 ').trim();el.value=B.company[k];el.classList.toggle('miss',CO_REQ.includes(k)&&!B.company[k]);saveB();flashSaved();missInfo()}
+function setAdr(id,k,el){const a=Object.assign({},adr(id));a[k]=el.value.trim();B.addr[id]=a;el.value=a[k];el.classList.toggle('miss',k!=='uid'&&!a[k]);saveB();flashSaved();missInfo()}
+function missCount(){return CO_REQ.filter(k=>!co(k)).length+OPT.filter(o=>o.status!=='setup').reduce((n,o)=>n+(!adr(o.id).street?1:0)+(!adr(o.id).city?1:0),0)}
+function missInfo(){const el=document.getElementById('missInfo');if(el){const n=missCount();el.textContent=n?n+' gelbe Feld'+(n>1?'er':'')+' noch offen':'Alle Pflichtfelder ausgefüllt'}}
+function renderFirma(){
+  const fld=([k,l,d])=>`<div class="${k==='name'||k==='street'?'wide':''}"><label for="co-${k}">${l}${CO_REQ.includes(k)?' *':''}</label><input class="txt ${CO_REQ.includes(k)&&!co(k)?'miss':''}" id="co-${k}" value="${esc(co(k))}" placeholder="${esc(d||'')}" ${k==='due'?'inputmode="numeric"':''} ${k==='email'?'type="email"':''} onchange="setCo('${k}',this)"></div>`;
+  document.getElementById('app').innerHTML=`
+  <div class="head"><div class="grow"><h1>Firmendaten</h1><p>Diese Angaben erscheinen auf allen neuen Rechnungen. Gelb markierte Felder sind noch leer. Änderungen werden sofort gespeichert.</p></div>
+    <div class="hint" style="font-weight:700"><span id="missInfo"></span><span class="saved" id="savedMsg">✓ Gespeichert</span></div></div>
+  <div class="card" style="margin-top:18px"><h2>Unsere Firma (Absender)</h2><div class="sub">Kopf und Fußzeile der Rechnung</div>
+    <div class="ff">${CO_FIELDS.map(fld).join('')}</div></div>
+  <div class="card" style="margin-top:14px"><h2>Rechnungsadressen der Optiker</h2><div class="sub">Empfänger auf der Rechnung. UID nur, wenn der Optiker eine hat.</div>
+    <div class="tblwrap"><table class="inv"><thead><tr><th>Optiker</th><th>Straße und Hausnummer *</th><th>PLZ und Ort *</th><th>UID-Nummer</th></tr></thead><tbody>
+    ${OPT.map(o=>{const a=adr(o.id),need=o.status!=='setup';return `<tr><td class="name"><b>${esc(o.name)}${o.live?'':'<span class="demo">Demo</span>'}</b><span>${badge(o.status)}</span></td>
+      <td><input class="txt ${need&&!a.street?'miss':''}" aria-label="Straße ${esc(o.name)}" value="${esc(a.street)}" onchange="setAdr('${o.id}','street',this)"></td>
+      <td><input class="txt ${need&&!a.city?'miss':''}" aria-label="PLZ und Ort ${esc(o.name)}" value="${esc(a.city)}" onchange="setAdr('${o.id}','city',this)"></td>
+      <td><input class="txt" aria-label="UID ${esc(o.name)}" value="${esc(a.uid)}" placeholder="ATU…" onchange="setAdr('${o.id}','uid',this)"></td></tr>`}).join('')}
+    </tbody></table></div>
+    <p class="note">Bereits erstellte Rechnungen behalten die Angaben vom Zeitpunkt der Erstellung. Für geänderte Daten die Rechnung stornieren und neu erstellen.</p></div>`;
+  missInfo();
 }
 function openInv(nr){const v=B.invoices.find(x=>x.nr===nr);if(!v)return;document.getElementById('invDoc').innerHTML=invHTML(v);const m=document.getElementById('modal');m.hidden=false;document.title=v.nr+' – OptiApp';m.querySelector('.mbar .btn').focus()}
 function closeInv(){document.getElementById('modal').hidden=true;document.title='OptiApp Verwaltung'}
@@ -365,7 +400,7 @@ function renderInv(keepFocus){
   document.getElementById('app').innerHTML=`
   <div class="head"><div class="grow"><h1>Rechnungen</h1><p>Monatliche Abrechnung je Filiale und je registriertem Endkunden. Alle Beträge netto, zzgl. 20 % USt.</p></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="flabel" for="perSel">Abrechnungsmonat</label><select class="sel" id="perSel" onchange="per=+this.value;flash=null;renderInv()">${monthsOpts}</select>
-    <button class="btn pri" onclick="createAll()" ${open.length?'':'disabled'}>Alle Rechnungen erstellen${open.length?' ('+open.length+')':''}</button></div></div>
+    <button class="btn pri" id="allBtn" onclick="createAll()" ${open.length?'':'disabled'}>Alle Rechnungen erstellen${open.length?' ('+open.length+')':''}</button></div></div>
   ${flash?`<div class="flash ${flash[0]==='warn'?'warn':''}" role="status">${esc(flash[1])}</div>`:''}
   <div class="card" style="margin-top:18px"><h2>Tarife und Abrechnung ${esc(mLong(MONTHS[per]))}</h2><div class="sub">Standardtarif je Optiker eintragen. Er wird bei „Rechnung erstellen“ übernommen. Offen: ${open.length} Rechnung${open.length===1?'':'en'} · ${eur(sumOpen)} netto</div>
     <div class="tblwrap"><table class="inv"><thead><tr><th>Optiker</th><th class="num">Filialen</th><th class="num">Endkunden<br>am Monatsende</th><th class="num">€ je Filiale<br>und Monat</th><th class="num">€ je Endkunde<br>und Monat</th><th class="num">Betrag netto</th><th class="num">Rechnung</th></tr></thead><tbody>
@@ -374,7 +409,7 @@ function renderInv(keepFocus){
       <td class="num"><input class="money" id="ts-${o.id}" inputmode="decimal" aria-label="Tarif je Filiale ${esc(o.name)}" placeholder="0,00" value="${fmtIn(t.store)}" onchange="setTariff('${o.id}','store',this)"></td>
       <td class="num"><input class="money" id="tc-${o.id}" inputmode="decimal" aria-label="Tarif je Endkunde ${esc(o.name)}" placeholder="0,00" value="${fmtIn(t.cust)}" onchange="setTariff('${o.id}','cust',this)"></td>
       <td class="num">${inv?eur(inv.net):(t.store||t.cust)&&!why?eur(c.net):'–'}</td>
-      <td class="num">${inv?`<button class="btn sm" onclick="openInv('${inv.nr}')">${inv.nr} ansehen</button>`:why?`<span class="hint">${why}</span>`:`<button class="btn sm pri" onclick="createInv('${o.id}')">Rechnung erstellen</button>`}</td></tr>`}).join('')}
+      <td class="num">${inv?`<button class="btn sm" id="ac-${o.id}" onclick="openInv('${inv.nr}')">${inv.nr} ansehen</button>`:why?`<span class="hint">${why}</span>`:`<button class="btn sm pri" id="ac-${o.id}" onclick="createInv('${o.id}')">Rechnung erstellen</button>`}</td></tr>`}).join('')}
     </tbody></table></div>
     <p class="note">Endkunden = alle registrierten Endkunden am Ende des Monats. Optiker in Einrichtung werden erst ab Start der App verrechnet. Optik Falkner rechnet mit den Live-Daten des Prototyps.</p></div>
   <div class="card" style="margin-top:14px"><h2>Erstellte Rechnungen</h2><div class="sub">${invs.length?invs.length+' Rechnung'+(invs.length>1?'en':'')+', neueste zuerst':'Noch keine Rechnungen erstellt.'}</div>
@@ -383,13 +418,13 @@ function renderInv(keepFocus){
       <td>${v.storno?'<span class="badge b-mute">Storniert</span>':'<span class="badge b-ok">Erstellt</span>'}</td>
       <td class="num"><div class="acts"><button class="btn sm" onclick="openInv('${v.nr}')">Ansehen / PDF</button>${v.storno?'':`<button class="btn sm" onclick="stornoInv('${v.nr}')">${stornoArm===v.nr?'Wirklich stornieren?':'Stornieren'}</button>`}</div></td></tr>`).join('')}
     </tbody></table></div>`:''}
-    <p class="note">Absender, UID, IBAN und Rechnungsadressen sind gelb markierte Platzhalter. Sie werden nach der Gründung der GmbH ergänzt.</p></div>`;
+    <p class="note">${missCount()?`Noch ${missCount()} Angaben offen (Absender, Bankdaten, Rechnungsadressen). Bitte unter <a href="#firma" onclick="go('firma');return false">Firmendaten</a> ausfüllen, sonst erscheinen sie gelb auf der Rechnung.`:'Firmendaten und Rechnungsadressen sind vollständig.'}</p></div>`;
   if(fid){const el=document.getElementById(fid);if(el)el.focus()}
 }
-function go(v){view=v;flash=null;stornoArm=null;try{history.replaceState(null,'',v==='rechnungen'?'#rechnungen':location.pathname)}catch(e){}renderAll();window.scrollTo(0,0)}
+function go(v){view=v;flash=null;stornoArm=null;try{history.replaceState(null,'',v==='optiker'?location.pathname:'#'+v)}catch(e){}renderAll();window.scrollTo(0,0)}
 function renderAll(){document.querySelectorAll('.nav button').forEach(b=>{if(b.dataset.v===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
-  if(view==='rechnungen')renderInv();else render()}
-if(location.hash==='#rechnungen')view='rechnungen';
+  if(view==='rechnungen')renderInv();else if(view==='firma')renderFirma();else render()}
+if(location.hash==='#rechnungen')view='rechnungen';if(location.hash==='#firma')view='firma';
 const LOGO_SVG=(()=>{const l=document.querySelector('header .logo').cloneNode(true);l.setAttribute('height','34');l.style.color='#172235';return l.outerHTML})();
 load();renderAll();
 window.addEventListener('storage',e=>{if(e.key==='falkner-v10'||e.key==='falkner-dash-v1'){load();renderAll()}});
