@@ -470,7 +470,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.6 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.7 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -762,7 +762,22 @@ function renderLenses(){
 function redeem(code){S.loyalty.vouchers=S.loyalty.vouchers.filter(v=>v.code!==code);persist();render();toast('Gutschein eingelöst')}
 
 /* --- News --- */
-const visibleNews=()=>[...(S.extraNews||[]),...NEWS].filter(n=>n.store==='all'||n.store===curStore().id);
+/* News-Zielgruppe: aud={ageMin,ageMax,yearsMin,prod('all'|'glasses'|'lenses')}; ohne aud = alle */
+const LIVE_SINCE='2019-03-14';
+function ageOf(b){if(!b)return null;const s=String(b),now=new Date();if(/^\d{4}$/.test(s))return now.getFullYear()-+s;const d=new Date(s+'T12:00');if(isNaN(d))return null;let a=now.getFullYear()-d.getFullYear();if(now.getMonth()<d.getMonth()||(now.getMonth()===d.getMonth()&&now.getDate()<d.getDate()))a--;return a}
+function yearsSince(s){const a=ageOf(s);return a===null?0:a}
+function audMatch(aud,p){if(!aud)return true;const age=ageOf(p.birth),yrs=yearsSince(p.since);
+  if((aud.ageMin!=null||aud.ageMax!=null)&&age===null)return false;
+  if(aud.ageMin!=null&&age<aud.ageMin)return false; if(aud.ageMax!=null&&age>aud.ageMax)return false;
+  if(aud.yearsMin&&yrs<aud.yearsMin)return false;
+  if(aud.prod==='glasses'&&!(p.glasses&&p.glasses.length))return false; if(aud.prod==='lenses'&&!p.lenses)return false;
+  return true}
+function audText(aud){if(!aud)return 'Alle Kunden';const t=[];
+  if(aud.ageMin!=null&&aud.ageMax!=null)t.push(aud.ageMin+'–'+aud.ageMax+' Jahre');else if(aud.ageMin!=null)t.push('ab '+aud.ageMin+' Jahren');else if(aud.ageMax!=null)t.push('bis '+aud.ageMax+' Jahre');
+  if(aud.yearsMin)t.push('mind. '+aud.yearsMin+' J. Kunde');if(aud.prod==='glasses')t.push('Brillenträger');if(aud.prod==='lenses')t.push('Kontaktlinsenträger');return t.join(' · ')||'Alle Kunden'}
+// News mit Zielgruppe: sichtbar, wenn der Kontoinhaber oder ein Familienmitglied passt (Eltern verwalten die Kinder)
+const appPeople=()=>[{birth:S.profile.birth,since:S.profile.since||LIVE_SINCE,glasses:S.glasses,lenses:S.lenses},...(S.family||[]).map(k=>({birth:k.birth,since:S.profile.since||LIVE_SINCE,glasses:k.glasses,lenses:k.lenses}))];
+const visibleNews=()=>[...(S.extraNews||[]),...NEWS].filter(n=>(n.store==='all'||n.store===curStore().id)&&(!n.aud||appPeople().some(p=>audMatch(n.aud,p))));
 function renderNews(){
   const list=visibleNews(), unread=list.filter(n=>!S.newsRead.includes(n.id)).length, dot=document.getElementById('newsDot');
   dot.style.display=unread?'grid':'none'; dot.textContent=unread;

@@ -57,7 +57,7 @@ h1,h2{font-family:var(--display);margin:0;line-height:1.15}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
 .axis text{fill:var(--muted);font-size:12px;font-family:var(--text)}
 .gridline{stroke:var(--grid);stroke-width:1}
-.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);padding:7px 10px;border-radius:9px;font-size:13px;line-height:1.35;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .12s}
+.tip{position:absolute;z-index:5;pointer-events:none;background:var(--ink);color:var(--paper);padding:7px 10px;border-radius:9px;font-size:13px;line-height:1.35;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .12s}
 .tip.on{opacity:1}
 .tip b{font-weight:700}
 .tblwrap{overflow-x:auto;margin-top:12px}
@@ -81,7 +81,7 @@ tbody tr:hover td,tbody tr[aria-selected="true"] td{background:var(--surface-2)}
 .dcols{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:16px}
 .stores{list-style:none;padding:0;margin:8px 0 0}
 .stores li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
-.note{font-size:13px;color:var(--muted);margin-top:18px}
+.note{font-size:13px;color:var(--muted);margin-top:18px}.note a{color:var(--lens);font-weight:700}
 .nav{display:flex;gap:4px;margin-left:6px}
 .nav button{border:0;background:transparent;border-radius:999px;padding:8px 14px;font-weight:700;font-size:15px;color:var(--muted)}
 .nav button[aria-current="page"]{background:var(--surface-2);color:var(--ink)}
@@ -92,6 +92,7 @@ tbody tr:hover td,tbody tr[aria-selected="true"] td{background:var(--surface-2)}
 .money{width:92px;text-align:right;font:inherit;font-variant-numeric:tabular-nums;padding:6px 8px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
 .money:focus{border-color:var(--lens);outline:none}
 .sel{font:inherit;font-weight:700;font-size:14px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink)}
+.inv tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;padding-top:12px}
 .inv tbody tr{cursor:default}.inv tbody tr:hover td{background:transparent}
 .acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .hint{font-size:13px;color:var(--muted)}
@@ -258,6 +259,7 @@ function renderDetail(){
 const NS='http://www.w3.org/2000/svg';
 function niceMax(v){if(v<=0)return 4;const p=Math.pow(10,Math.floor(Math.log10(v))),n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
 function ticks(max){const step=max/4;return [0,1,2,3,4].map(i=>Math.round(i*step))}
+function placeTip(t,x,y){t.style.top=y;t.classList.add('on');const host=t.parentNode,w=t.offsetWidth,hw=host.clientWidth,cx=parseFloat(x);t.style.left=Math.max(w/2,Math.min(hw-w/2,cx))+'px'}
 function mkTip(host){const t=document.createElement('div');t.className='tip';host.appendChild(t);return t}
 function lineChart(id,labels,vals,long,unit){
   const host=document.getElementById(id), W=620,H=250,L=48,R=14,T=14,B=30, max=niceMax(Math.max(...vals)), x=i=>L+(labels.length===1?0:i*(W-L-R)/(labels.length-1)), y=v=>T+(H-T-B)*(1-v/max);
@@ -273,7 +275,7 @@ function lineChart(id,labels,vals,long,unit){
   const tip=mkTip(host), svg=host.querySelector('svg'), hit=document.getElementById(id+'H'), X=document.getElementById(id+'X'), D=document.getElementById(id+'D');
   const move=e=>{const r=svg.getBoundingClientRect(),k=W/r.width,px=(e.clientX-r.left)*k;let i=Math.round((px-L)/((W-L-R)/Math.max(1,labels.length-1)));i=Math.max(0,Math.min(labels.length-1,i));
     X.setAttribute('x1',x(i));X.setAttribute('x2',x(i));X.setAttribute('opacity',1);D.setAttribute('cx',x(i));D.setAttribute('cy',y(vals[i]));D.setAttribute('opacity',1);
-    const prev=i?vals[i]-vals[i-1]:null;tip.innerHTML=`${long[i]}<br><b>${nf(vals[i])} ${unit}</b>${prev!==null?` · ${prev>=0?'+':''}${nf(prev)}`:''}`;tip.style.left=(x(i)/k)+'px';tip.style.top=(y(vals[i])/k)+'px';tip.classList.add('on')};
+    const prev=i?vals[i]-vals[i-1]:null;tip.innerHTML=`${long[i]}<br><b>${nf(vals[i])} ${unit}</b>${prev!==null?` · ${prev>=0?'+':''}${nf(prev)}`:''}`;placeTip(tip,(x(i)/k)+'px',(y(vals[i])/k)+'px')};
   hit.addEventListener('pointermove',move);hit.addEventListener('pointerdown',move);hit.addEventListener('pointerleave',()=>{tip.classList.remove('on');X.setAttribute('opacity',0);D.setAttribute('opacity',0)});
 }
 function barChart(id,names,vals,ids){
@@ -286,7 +288,7 @@ function barChart(id,names,vals,ids){
       <text x="${lw+w+8}" y="${yy+21}" style="font:700 13px var(--text);fill:var(--ink)">${nf(vals[i])}</text></g>`});
   host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Balkendiagramm: Endkunden je Optiker">${s}</svg>`;
   const tip=mkTip(host), svg=host.querySelector('svg'), tot=vals.reduce((a,b)=>a+b,0);
-  host.querySelectorAll('.bar').forEach(g=>{const i=+g.dataset.i;g.addEventListener('pointerenter',()=>{const r=svg.getBoundingClientRect(),k=W/r.width;tip.innerHTML=`${esc(names[i])}<br><b>${nf(vals[i])} Endkunden</b> · ${tot?Math.round(vals[i]/tot*100):0} %`;tip.style.left=((lw+bw/2)/k)+'px';tip.style.top=((T+i*rowH+8)/k)+'px';tip.classList.add('on')});g.addEventListener('pointerleave',()=>tip.classList.remove('on'))});
+  host.querySelectorAll('.bar').forEach(g=>{const i=+g.dataset.i;g.addEventListener('pointerenter',()=>{const r=svg.getBoundingClientRect(),k=W/r.width;tip.innerHTML=`${esc(names[i])}<br><b>${nf(vals[i])} Endkunden</b> · ${tot?Math.round(vals[i]/tot*100):0} %`;placeTip(tip,((lw+bw/2)/k)+'px',((T+i*rowH+8)/k)+'px')});g.addEventListener('pointerleave',()=>tip.classList.remove('on'))});
 }
 function colChart(id,labels,vals,long){
   const host=document.getElementById(id), W=560,H=210,L=40,R=8,T=10,B=28,max=niceMax(Math.max(...vals,1)),n=labels.length,slot=(W-L-R)/n,bw=Math.min(30,slot-6),y=v=>T+(H-T-B)*(1-v/max);
@@ -295,7 +297,7 @@ function colChart(id,labels,vals,long){
   let bars='';vals.forEach((v,i)=>{const cx=L+slot*i+slot/2,h=(H-T-B)-(y(v)-T);bars+=`<g class="col" data-i="${i}"><rect x="${cx-slot/2}" y="${T}" width="${slot}" height="${H-T-B}" fill="transparent"/>${v?`<path d="M${cx-bw/2} ${H-B} V${y(v)+4} q0 -4 4 -4 H${cx+bw/2-4} q4 0 4 4 V${H-B} Z" fill="var(--series)"/>`:''}</g>`});
   host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Säulendiagramm: neue Registrierungen pro Monat"><g class="axis">${s}</g>${bars}<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--line)"/></svg>`;
   const tip=mkTip(host),svg=host.querySelector('svg');
-  host.querySelectorAll('.col').forEach(g=>{const i=+g.dataset.i;g.addEventListener('pointerenter',()=>{const r=svg.getBoundingClientRect(),k=W/r.width;tip.innerHTML=`${long[i]}<br><b>${nf(vals[i])} neue Endkunden</b>`;tip.style.left=((L+slot*i+slot/2)/k)+'px';tip.style.top=(y(vals[i])/k)+'px';tip.classList.add('on')});g.addEventListener('pointerleave',()=>tip.classList.remove('on'))});
+  host.querySelectorAll('.col').forEach(g=>{const i=+g.dataset.i;g.addEventListener('pointerenter',()=>{const r=svg.getBoundingClientRect(),k=W/r.width;tip.innerHTML=`${long[i]}<br><b>${nf(vals[i])} neue Endkunden</b>`;placeTip(tip,((L+slot*i+slot/2)/k)+'px',(y(vals[i])/k)+'px')});g.addEventListener('pointerleave',()=>tip.classList.remove('on'))});
 }
 
 /* ===================== Rechnungen ===================== */
@@ -410,14 +412,15 @@ function renderInv(keepFocus){
       <td class="num"><input class="money" id="tc-${o.id}" inputmode="decimal" aria-label="Tarif je Endkunde ${esc(o.name)}" placeholder="0,00" value="${fmtIn(t.cust)}" onchange="setTariff('${o.id}','cust',this)"></td>
       <td class="num">${inv?eur(inv.net):(t.store||t.cust)&&!why?eur(c.net):'–'}</td>
       <td class="num">${inv?`<button class="btn sm" id="ac-${o.id}" onclick="openInv('${inv.nr}')">${inv.nr} ansehen</button>`:why?`<span class="hint">${why}</span>`:`<button class="btn sm pri" id="ac-${o.id}" onclick="createInv('${o.id}')">Rechnung erstellen</button>`}</td></tr>`}).join('')}
-    </tbody></table></div>
+    </tbody><tfoot><tr><td>Gesamt (${rows.length} Optiker)</td><td class="num">${nf(rows.reduce((a,r)=>a+r.c.stores,0))}</td><td class="num">${nf(rows.reduce((a,r)=>a+r.c.cust,0))}</td><td></td><td></td>
+      <td class="num">${eur(r2(rows.reduce((a,r)=>a+(r.inv?r.inv.net:(!r.why?r.c.net:0)),0)))}</td><td class="num hint" style="font-weight:400">${rows.filter(r=>r.inv).length} erstellt · ${open.length} offen</td></tr></tfoot></table></div>
     <p class="note">Endkunden = alle registrierten Endkunden am Ende des Monats. Optiker in Einrichtung werden erst ab Start der App verrechnet. Optik Falkner rechnet mit den Live-Daten des Prototyps.</p></div>
   <div class="card" style="margin-top:14px"><h2>Erstellte Rechnungen</h2><div class="sub">${invs.length?invs.length+' Rechnung'+(invs.length>1?'en':'')+', neueste zuerst':'Noch keine Rechnungen erstellt.'}</div>
     ${invs.length?`<div class="tblwrap"><table class="inv"><thead><tr><th>Nummer</th><th>Datum</th><th>Optiker</th><th>Zeitraum</th><th class="num">Netto</th><th class="num">Brutto</th><th>Status</th><th class="num"></th></tr></thead><tbody>
     ${invs.map(v=>`<tr class="${v.storno?'strike':''}"><td><b>${v.nr}</b></td><td>${fmtD(v.date)}</td><td>${esc(v.optName)}</td><td>${v.periodTxt}</td><td class="num amt">${eur(v.net)}</td><td class="num amt">${eur(v.gross)}</td>
       <td>${v.storno?'<span class="badge b-mute">Storniert</span>':'<span class="badge b-ok">Erstellt</span>'}</td>
       <td class="num"><div class="acts"><button class="btn sm" onclick="openInv('${v.nr}')">Ansehen / PDF</button>${v.storno?'':`<button class="btn sm" onclick="stornoInv('${v.nr}')">${stornoArm===v.nr?'Wirklich stornieren?':'Stornieren'}</button>`}</div></td></tr>`).join('')}
-    </tbody></table></div>`:''}
+    </tbody><tfoot>${(()=>{const ok=invs.filter(v=>!v.storno),st=invs.length-ok.length;return `<tr><td colspan="4">Gesamt (${ok.length} Rechnung${ok.length===1?'':'en'}${st?', ohne '+st+' storniert'+(st>1?'e':'e'):''})</td><td class="num">${eur(r2(ok.reduce((a,v)=>a+v.net,0)))}</td><td class="num">${eur(r2(ok.reduce((a,v)=>a+v.gross,0)))}</td><td colspan="2"></td></tr>`})()}</tfoot></table></div>`:''}
     <p class="note">${missCount()?`Noch ${missCount()} Angaben offen (Absender, Bankdaten, Rechnungsadressen). Bitte unter <a href="#firma" onclick="go('firma');return false">Firmendaten</a> ausfüllen, sonst erscheinen sie gelb auf der Rechnung.`:'Firmendaten und Rechnungsadressen sind vollständig.'}</p></div>`;
   if(fid){const el=document.getElementById(fid);if(el)el.focus()}
 }

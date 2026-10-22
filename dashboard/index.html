@@ -159,6 +159,8 @@ table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--surf
 .qr svg{width:200px;height:200px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.days{grid-template-columns:repeat(3,1fr)}.two,.cust{grid-template-columns:1fr}}
 @media (max-width:760px){.layout{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.side-foot,.logo{display:none}.nav{width:auto}main{padding:16px}.inbox{grid-template-columns:1fr;height:auto}.days{grid-template-columns:1fr 1fr}}
+.aud{margin-top:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.audn{margin-top:12px;font-size:14px}.audn b{font-size:18px;color:var(--accent)}.audn.zero b{color:var(--danger)}
 </style>
 </head>
 <body>
@@ -168,7 +170,7 @@ table.t tr.click{cursor:pointer} table.t tr.click:hover td{background:var(--surf
     <div id="navList"></div>
     <div class="side-foot"><div class="sideuser"><span class="av" id="sideAv" style="width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700">T</span><div class="grow"><b id="sideName">–</b><div id="sideRole" class="small"></div></div></div>
       <button class="btn ghost sm" style="margin-top:10px;width:100%" onclick="logout()">Abmelden</button>
-      <div style="margin-top:10px">Dashboard-Prototyp v0.8<br>Alle Kundendaten sind Beispieldaten.</div></div>
+      <div style="margin-top:10px">Dashboard-Prototyp v0.9<br>Alle Kundendaten sind Beispieldaten.</div></div>
   </aside>
   <main>
     <div class="top">
@@ -299,24 +301,24 @@ function applyBrand(){const b=S.brand||{},r=document.documentElement,im=document
 
 const ts=(dayOff,h,m)=>{const d=new Date();d.setDate(d.getDate()+dayOff);d.setHours(h,m||0,0,0);return d.toISOString()};
 const DDEFAULT={customers:[
-  {id:'c2',name:'Maria Berger',store:'perg',phone:'+43 664 210 3344',mail:'maria.berger@example.at',
+  {id:'c2',birth:'1961-03-08',since:'2009-05-20',name:'Maria Berger',store:'perg',phone:'+43 664 210 3344',mail:'maria.berger@example.at',
    chat:[{id:'d1',from:'me',text:'Hallo, kann ich meine Brille morgen Vormittag abholen?',ts:ts(0,8,42)}],
    tickets:[{id:'dt1',kind:'Brillenauftrag',title:'Gleitsichtbrille neu',status:'In Arbeit',date:addDays(-3)}],
    appts:[{id:'da1',type:'Brillenglasberatung',date:workday(0),time:'14:30',store:'perg'}],
    glasses:[{id:'g1',date:'2026-09-02',R:{sph:'+1,25',cyl:'-0,75',ax:'90',add:'+2,00'},L:{sph:'+1,00',cyl:'-0,50',ax:'85',add:'+2,00'},pd:'32,0 / 32,0',kasko:{until:'2028-09-02',deductible:'€ 30'}}],
    lenses:null,loyalty:{points:0,goal:5,vouchers:[]},reviews:[{store:'perg',stars:5,text:'Sehr kompetente Beratung, gerne wieder!',date:addDays(-12)}]},
-  {id:'c3',name:'Thomas Huber',store:'dimbach',phone:'+43 680 555 1020',mail:'t.huber@example.at',
+  {id:'c3',birth:'1994-11-23',since:'2021-02-11',name:'Thomas Huber',store:'dimbach',phone:'+43 680 555 1020',mail:'t.huber@example.at',
    chat:[{id:'d2',from:'shop',store:'dimbach',text:'Ihre Kontaktlinsen sind eingetroffen.',ts:ts(-2,10,5),staffRead:true},{id:'d3',from:'me',text:'Super, danke! Ich komme am Freitag.',ts:ts(-2,10,30),staffRead:true}],
    tickets:[{id:'dt2',kind:'Bestellung',title:'4× Kontaktlinsen (Torische)',status:'Abholbereit',date:addDays(-2)}],
    appts:[{id:'da2',type:'Kontaktlinsen-Kontrolle',date:workday(2),time:'08:00',store:'dimbach'}],
    glasses:[],lenses:{kind:'torisch',wear:'Monatslinse',R:{sph:'-3,25',cyl:'-1,25',ax:'180'},L:{sph:'-3,00',cyl:'-1,00',ax:'175'}},
    loyalty:{points:4,goal:5,vouchers:[]},reviews:[{store:'dimbach',stars:4,text:'Freundlich, nur kurze Wartezeit.',date:addDays(-20)}]},
-  {id:'c4',name:'Anna Leitner',store:'perg',phone:'+43 676 908 7711',mail:'anna.leitner@example.at',
+  {id:'c4',birth:'2003-07-30',since:'2024-08-02',name:'Anna Leitner',store:'perg',phone:'+43 676 908 7711',mail:'anna.leitner@example.at',
    chat:[{id:'d4',from:'me',text:'Mein Bügel ist abgebrochen 😕 Kann ich spontan vorbeikommen?',ts:ts(0,9,58)}],
    tickets:[{id:'dt3',kind:'Schadensmeldung',title:'Bügel lose/gebrochen – Brille vom 11.04.2025',status:'In Prüfung',date:addDays(0)}],
    appts:[],glasses:[{id:'g1',date:'2025-04-11',R:{sph:'-0,75',cyl:'–',ax:'–',add:'–'},L:{sph:'-1,00',cyl:'–',ax:'–',add:'–'},pd:'30,5 / 31,0',kasko:{until:'2027-04-11',deductible:'€ 30'}}],
    lenses:null,loyalty:{points:0,goal:5,vouchers:[]},reviews:[]},
-  {id:'c5',name:'Stefan Gruber',store:'dimbach',phone:'+43 650 300 4422',mail:'s.gruber@example.at',
+  {id:'c5',birth:'1976-01-17',since:'2015-10-06',name:'Stefan Gruber',store:'dimbach',phone:'+43 650 300 4422',mail:'s.gruber@example.at',
    chat:[],tickets:[{id:'dt4',kind:'Reparatur',title:'Schraube ersetzt',status:'Abgeschlossen',date:addDays(-9)}],
    appts:[{id:'da3',type:'Augenkontrolle',date:workday(1),time:'09:30',store:'dimbach'}],
    glasses:[{id:'g1',date:'2024-11-20',R:{sph:'-2,50',cyl:'-0,25',ax:'5',add:'–'},L:{sph:'-2,25',cyl:'–',ax:'–',add:'–'},pd:'31,0 / 31,5'}],
@@ -326,7 +328,8 @@ let D;
 try{D=JSON.parse(localStorage.getItem(DKEY))}catch(e){}
 if(!D)D=JSON.parse(JSON.stringify(DDEFAULT));
 function saveD(){try{localStorage.setItem(DKEY,JSON.stringify(D))}catch(e){}}
-D.customers.forEach((c,i)=>{if(!c.kdnr)c.kdnr=String(310400+i*37);c.tickets.forEach(x=>x.status=normStatus(x.status))});
+const DEMO_BIRTH={'c2':['1961-03-08','2009-05-20'],'c3':['1994-11-23','2021-02-11'],'c4':['2003-07-30','2024-08-02'],'c5':['1976-01-17','2015-10-06']};
+D.customers.forEach((c,i)=>{if(!c.kdnr)c.kdnr=String(310400+i*37);if(DEMO_BIRTH[c.id]){if(!c.birth)c.birth=DEMO_BIRTH[c.id][0];if(!c.since)c.since=DEMO_BIRTH[c.id][1]}if(!c.since)c.since=(c.invited||new Date().toISOString().slice(0,10));c.tickets.forEach(x=>x.status=normStatus(x.status))});
 const TPL_DEFAULT=[
   ['✅','Brille abholbereit','Ihre Brille ist bereit zur Abholung','Sie können Ihre Brille ab sofort in der Filiale {f} abholen.','hours'],
   ['✅','Linsen abholbereit','Ihre Kontaktlinsen sind abholbereit','Sie können die Linsen ab sofort in der Filiale {f} abholen.','hours'],
@@ -339,10 +342,23 @@ D.templates=D.templates||JSON.parse(JSON.stringify(TPL_DEFAULT)); D.snippets=D.s
 if(!D.kvSnip){if(!D.snippets.some(x=>/^Kostenvoranschlag/.test(x)))D.snippets.push(SNIP_DEFAULT[SNIP_DEFAULT.length-1]);D.kvSnip=1;saveD()}
 
 /* Live-Kunde aus der App */
-function liveCust(){return {id:'live',live:true,kdnr:S.profile.kdnr,name:S.profile.first+' '+S.profile.last,store:S.store||'perg',phone:S.profile.phone,mail:S.profile.mail,
+/* News-Zielgruppe: aud={ageMin,ageMax,yearsMin,prod('all'|'glasses'|'lenses')}; ohne aud = alle */
+const LIVE_SINCE='2019-03-14';
+function ageOf(b){if(!b)return null;const s=String(b),now=new Date();if(/^\d{4}$/.test(s))return now.getFullYear()-+s;const d=new Date(s+'T12:00');if(isNaN(d))return null;let a=now.getFullYear()-d.getFullYear();if(now.getMonth()<d.getMonth()||(now.getMonth()===d.getMonth()&&now.getDate()<d.getDate()))a--;return a}
+function yearsSince(s){const a=ageOf(s);return a===null?0:a}
+function audMatch(aud,p){if(!aud)return true;const age=ageOf(p.birth),yrs=yearsSince(p.since);
+  if((aud.ageMin!=null||aud.ageMax!=null)&&age===null)return false;
+  if(aud.ageMin!=null&&age<aud.ageMin)return false; if(aud.ageMax!=null&&age>aud.ageMax)return false;
+  if(aud.yearsMin&&yrs<aud.yearsMin)return false;
+  if(aud.prod==='glasses'&&!(p.glasses&&p.glasses.length))return false; if(aud.prod==='lenses'&&!p.lenses)return false;
+  return true}
+function audText(aud){if(!aud)return 'Alle Kunden';const t=[];
+  if(aud.ageMin!=null&&aud.ageMax!=null)t.push(aud.ageMin+'–'+aud.ageMax+' Jahre');else if(aud.ageMin!=null)t.push('ab '+aud.ageMin+' Jahren');else if(aud.ageMax!=null)t.push('bis '+aud.ageMax+' Jahre');
+  if(aud.yearsMin)t.push('mind. '+aud.yearsMin+' J. Kunde');if(aud.prod==='glasses')t.push('Brillenträger');if(aud.prod==='lenses')t.push('Kontaktlinsenträger');return t.join(' · ')||'Alle Kunden'}
+function liveCust(){return {id:'live',live:true,kdnr:S.profile.kdnr,birth:S.profile.birth,since:S.profile.since||LIVE_SINCE,name:S.profile.first+' '+S.profile.last,store:S.store||'perg',phone:S.profile.phone,mail:S.profile.mail,
   chat:S.chat,tickets:S.tickets,appts:S.appts,glasses:S.glasses,lenses:S.lenses,loyalty:S.loyalty,reviews:S.reviews}}
 const kidCust=k=>({id:'live:'+k.id,live:true,parent:liveCust().name,name:k.first+' '+k.last,store:S.store||'perg',phone:S.profile.phone,mail:S.profile.mail,
-  relation:k.relation,birth:k.birth,chat:[],tickets:[],appts:[],glasses:k.glasses,lenses:k.lenses,loyalty:null,reviews:[]});
+  relation:k.relation,birth:k.birth,since:S.profile.since||LIVE_SINCE,chat:[],tickets:[],appts:[],glasses:k.glasses,lenses:k.lenses,loyalty:null,reviews:[]});
 const customers=()=>[liveCust(),...S.family.map(kidCust),...D.customers.filter(c=>c.kdnr!==S.profile.kdnr)];
 const cust=id=>customers().find(c=>c.id===id);
 // Änderung an einem Kunden: Live-Kunde frisch laden, ändern, speichern
@@ -612,9 +628,9 @@ function vCustomers(){
     <div class="card"><input class="input" placeholder="Kunde suchen …" value="${esc(q)}" oninput="q=this.value;render();const i=document.querySelector('.cust .input');i.focus();i.setSelectionRange(q.length,q.length)">
       <div style="margin-top:8px">${cs.map(x=>`<div class="li" style="cursor:pointer;${x.id===selCust?'background:var(--accent-soft);border-radius:9px;padding-left:8px':''}" onclick="selCust='${x.id}';render()"><span class="cav">${initials(x.name)}</span><div class="grow"><b>${custName(x)}</b><div class="muted small">${x.parent?esc(x.relation)+' von '+esc(x.parent):'Filiale '+storeName(x.store)}</div></div>${unreadOf(x)?'<span class="dot"></span>':''}</div>`).join('')||'<p class="empty">Kein Kunde gefunden</p>'}</div></div>
     <div class="grid">
-      <div class="card"><div class="row"><span class="cav" style="width:48px;height:48px;font-size:18px">${initials(c.name)}</span><div class="grow"><h3>${custName(c)}</h3><div class="muted">${c.parent?esc(c.relation)+(c.birth?' · Jg. '+esc(c.birth):'')+' · Konto von '+esc(c.parent)+' · ':''}Stammfiliale ${storeName(c.store)} · ${esc(c.phone)}</div></div>
+      <div class="card"><div class="row"><span class="cav" style="width:48px;height:48px;font-size:18px">${initials(c.name)}</span><div class="grow"><h3>${custName(c)}</h3><div class="muted">${c.parent?esc(c.relation)+(c.birth?' · Jg. '+esc(c.birth)+' ('+ageOf(c.birth)+' J.)':'')+' · Konto von '+esc(c.parent)+' · ':''}${!c.parent&&c.birth?'Geb. '+fmtDate(c.birth)+' ('+ageOf(c.birth)+' J.) · ':''}Stammfiliale ${storeName(c.store)} · ${esc(c.phone)}</div></div>
         <button class="btn ghost" onclick="go('inbox','${c.parent?'live':c.id}')">Nachricht${c.parent?' an Eltern':''}</button>${!c.live?`<button class="btn ghost" style="margin-left:6px" onclick="invite('${c.id}')">📲 In App einladen</button>`:''}</div>
-        <div class="muted small" style="margin-top:8px">Kundennr. ${esc(c.kdnr||'–')} · ${c.live?'<span class="badge b-ok">App aktiv</span>':c.invited?'<span class="badge b-warn">Eingeladen am '+fmtDate(c.invited)+'</span>':'<span class="badge b-mute">Noch nicht eingeladen</span>'}</div>
+        <div class="muted small" style="margin-top:8px">Kundennr. ${esc(c.kdnr||'–')} · ${c.since&&!c.parent?'Kunde seit '+fmtDate(c.since,{month:'long',year:'numeric'})+' · ':''}${c.live?'<span class="badge b-ok">App aktiv</span>':c.invited?'<span class="badge b-warn">Eingeladen am '+fmtDate(c.invited)+'</span>':'<span class="badge b-mute">Noch nicht eingeladen</span>'}</div>
         ${fam.length?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><span class="muted small">Familie:</span>${fam.map(k=>`<button class="btn ghost sm" onclick="selCust='live:${k.id}';render()">👤 ${esc(k.first)} · ${esc(k.relation)}</button>`).join('')}</div>`:''}</div>
       <div class="grid two">
         <div class="card"><div class="row"><h2 class="grow" style="margin:0">Brillenpass</h2></div>${g?`<div class="muted small" style="margin-top:8px">Messung vom ${fmtDate(g.date)}</div>
@@ -640,6 +656,7 @@ function vCustomers(){
 }
 function newCustomer(){
   modal('Kunde anlegen',`<div class="grid two" style="gap:10px"><div><label class="f">Vorname</label><input class="input" id="ncF"></div><div><label class="f">Nachname</label><input class="input" id="ncL"></div></div>
+    <label class="f">Geburtsdatum</label><input class="input" id="ncB" type="date">
     <label class="f">Mobiltelefon</label><input class="input" id="ncP" type="tel" placeholder="+43 …"><label class="f">E-Mail</label><input class="input" id="ncM" type="email">
     <label class="f">Stammfiliale</label><select class="input" id="ncS">${storeOptions(filter==='all'?'perg':filter)}</select>
     <p class="small" id="ncErr" style="color:var(--danger);margin-top:6px"></p>
@@ -649,7 +666,7 @@ function saveCustomer(){
   const v=id=>document.getElementById(id).value.trim();
   if(!v('ncF')||!v('ncL')){document.getElementById('ncErr').textContent='Bitte Vor- und Nachname angeben.';return}
   let kd;do{kd=String(Math.floor(200000+Math.random()*700000))}while(customers().some(c=>c.kdnr===kd));
-  const c={id:uid('c'),kdnr:kd,name:v('ncF')+' '+v('ncL'),store:v('ncS'),phone:v('ncP'),mail:v('ncM'),chat:[],tickets:[],appts:[],glasses:[],lenses:null,loyalty:{points:0,goal:5,vouchers:[]},reviews:[]};
+  const c={id:uid('c'),kdnr:kd,birth:v('ncB'),since:new Date().toISOString().slice(0,10),name:v('ncF')+' '+v('ncL'),store:v('ncS'),phone:v('ncP'),mail:v('ncM'),chat:[],tickets:[],appts:[],glasses:[],lenses:null,loyalty:{points:0,goal:5,vouchers:[]},reviews:[]};
   D.customers.push(c);saveD();selCust=c.id;page='customers';render();invite(c.id);
 }
 function invite(cid){
@@ -689,18 +706,37 @@ function vNews(){
       <label class="f">Titel</label><input class="input" id="nTitle" placeholder="z. B. Neue Sonnenbrillen eingetroffen">
       <label class="f">Kategorie</label><input class="input" id="nTag" placeholder="z. B. Neu im Sortiment" value="Info">
       <label class="f">Text</label><textarea class="input" id="nText" rows="4" placeholder="Kurzer Text für die App …"></textarea>
-      <label class="f">Sichtbar für</label><select class="input" id="nStore"><option value="all">Alle Filialen</option><option value="perg">Nur Perg</option><option value="dimbach">Nur Dimbach</option></select>
+      <label class="f">Sichtbar für</label><select class="input" id="nStore" onchange="audCount()"><option value="all">Alle Filialen</option><option value="perg">Nur Perg</option><option value="dimbach">Nur Dimbach</option></select>
       <label class="row small" style="margin-top:10px;gap:6px"><input type="checkbox" id="nCta"> Button „Termin buchen“ anzeigen</label>
+      <div class="aud"><div class="row"><b class="grow">Zielgruppe</b><button class="btn ghost sm" type="button" onclick="resetAud()">Zurücksetzen</button></div>
+        <div class="grid two" style="gap:10px;margin-top:6px">
+          <div><label class="f">Alter von</label><input class="input" id="aMin" type="number" min="0" max="120" inputmode="numeric" placeholder="z. B. 6" oninput="audCount()"></div>
+          <div><label class="f">Alter bis</label><input class="input" id="aMax" type="number" min="0" max="120" inputmode="numeric" placeholder="z. B. 14" oninput="audCount()"></div>
+          <div><label class="f">Kunde seit mindestens</label><select class="input" id="aYrs" onchange="audCount()"><option value="0">egal</option>${[1,2,3,5,10,15,20].map(y=>`<option value="${y}">${y} Jahr${y>1?'en':''}</option>`).join('')}</select></div>
+          <div><label class="f">Trägt</label><select class="input" id="aProd" onchange="audCount()"><option value="all">egal</option><option value="glasses">Brille</option><option value="lenses">Kontaktlinsen</option></select></div>
+        </div>
+        <div class="audn" id="audN" role="status"></div></div>
       <button class="btn accent" style="margin-top:14px" onclick="addNews()">In der App veröffentlichen</button></div>
     <div class="card"><h2>Veröffentlicht</h2>
-      ${own.map(n=>`<div class="li"><div class="grow"><b>${esc(n.title)}</b><div class="muted small">${esc(n.tag)} · ${n.store==='all'?'Alle Filialen':storeName(n.store)} · ${fmtDate(n.date)}</div></div><button class="btn ghost sm" style="color:var(--danger)" onclick="delNews('${n.id}')">Löschen</button></div>`).join('')}
+      ${own.map(n=>`<div class="li"><div class="grow"><b>${esc(n.title)}</b><div class="muted small">${esc(n.tag)} · ${n.store==='all'?'Alle Filialen':storeName(n.store)} · ${fmtDate(n.date)}</div>${n.aud?`<div class="small" style="margin-top:2px">🎯 ${esc(audText(n.aud))} · ${(h=>h+' Kunde'+(h===1?'':'n'))(audHits(n.aud,n.store))}</div>`:''}</div><button class="btn ghost sm" style="color:var(--danger)" onclick="delNews('${n.id}')">Löschen</button></div>`).join('')}
       ${std.map(n=>`<div class="li"><div class="grow"><b>${esc(n.title)}</b><div class="muted small">${esc(n.tag)} · ${n.store==='all'?'Alle Filialen':storeName(n.store)} · ${fmtDate(n.date)}</div></div><span class="badge b-mute">Beispiel</span></div>`).join('')}
     </div></div>`);
+  audCount();
 }
+function readAud(){const g=id=>document.getElementById(id), num=id=>{const v=g(id).value.trim();return v===''?null:Math.max(0,Math.min(120,parseInt(v,10)||0))};
+  const a={ageMin:num('aMin'),ageMax:num('aMax'),yearsMin:+g('aYrs').value||0,prod:g('aProd').value};
+  if(a.ageMin!=null&&a.ageMax!=null&&a.ageMin>a.ageMax){const t=a.ageMin;a.ageMin=a.ageMax;a.ageMax=t}
+  return (a.ageMin==null&&a.ageMax==null&&!a.yearsMin&&a.prod==='all')?null:a}
+const audPool=store=>customers().filter(c=>store==='all'||c.store===store);
+const audHits=(aud,store)=>audPool(store).filter(c=>audMatch(aud,c)).length;
+function audCount(){const el=document.getElementById('audN');if(!el)return;const st=document.getElementById('nStore').value,aud=readAud(),pool=audPool(st),n=pool.filter(c=>audMatch(aud,c)).length;
+  el.innerHTML=`<b>${n}</b> von ${pool.length} Kunden${st==='all'?'':' in '+storeName(st)} erhalten diese News${aud?' · '+esc(audText(aud)):''}`;el.classList.toggle('zero',!n)}
+function resetAud(){['aMin','aMax'].forEach(id=>document.getElementById(id).value='');document.getElementById('aYrs').value='0';document.getElementById('aProd').value='all';audCount()}
 function addNews(){
   const t=document.getElementById('nTitle').value.trim(), tx=document.getElementById('nText').value.trim(); if(!t||!tx){toast('Bitte Titel und Text ausfüllen');return}
   const n={id:uid('n'),date:new Date().toISOString().slice(0,10),store:document.getElementById('nStore').value,tag:document.getElementById('nTag').value.trim()||'Info',title:t,text:tx};
   if(document.getElementById('nCta').checked)n.cta=['Termin buchen',"openSheet('book')"];
+  const aud=readAud(); if(aud){if(!audHits(aud,n.store)){toast('Kein Kunde passt zu dieser Zielgruppe');return}n.aud=aud}
   S=loadS();S.extraNews.unshift(n);saveS();render();toast('News veröffentlicht – in der App sichtbar');
 }
 function delNews(id){S=loadS();S.extraNews=S.extraNews.filter(n=>n.id!==id);saveS();render();toast('News gelöscht')}
