@@ -141,6 +141,7 @@ textarea.input{min-height:90px;resize:vertical}
 .upload{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;color:var(--muted);display:block;cursor:pointer}
 .thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+.thumbs .th{position:relative;display:inline-block}.thumbs .th button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:15px;line-height:22px;padding:0;cursor:pointer}
 .stepper{display:flex;align-items:center;gap:14px}
 .stepper button{width:38px;height:38px;border-radius:12px;background:var(--surface-2);font-size:20px;font-weight:600}
 .stepper b{min-width:24px;text-align:center;font-size:18px}
@@ -469,7 +470,7 @@ nav.bottom button.on{color:var(--brand)}
         <button class="list-item" style="width:100%;text-align:left" onclick="demoPush()"><div class="grow">Demo: Bewertungs-Benachrichtigung zeigen</div></button>
         <button class="list-item" style="width:100%;text-align:left;color:var(--danger)" onclick="resetDemo()"><div class="grow">Demo-Daten zurücksetzen</div></button>
       </div>
-      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.5 · Kundendaten sind Beispieldaten</p>
+      <p class="muted-s" style="text-align:center;margin-top:20px">Prototyp v1.6 · Kundendaten sind Beispieldaten</p>
     </section>
   </main>
 
@@ -618,7 +619,8 @@ function applyUI(){
   if(b.name2)document.querySelectorAll('.wm-sub').forEach(e=>e.textContent=b.name2);
 }
 applyStoreCfg();
-function persist(){try{localStorage.setItem('falkner-v10',JSON.stringify(S))}catch(e){}}
+let quotaWarned=false;
+function persist(){try{localStorage.setItem('falkner-v10',JSON.stringify(S))}catch(e){if(!quotaWarned&&typeof toast==='function'){quotaWarned=true;toast('Speicher des Prototyps ist voll – ältere Fotos bitte löschen')}}}
 
 const fmtDate=(iso,opt={day:'2-digit',month:'2-digit',year:'numeric'})=>new Date(iso+'T12:00').toLocaleDateString('de-AT',opt);
 const eur=v=>v.toLocaleString('de-AT',{style:'currency',currency:'EUR'});
@@ -991,7 +993,7 @@ function sendChat(text){
 }
 function chatPhoto(inp){
   const f=inp.files[0]; if(!f)return; inp.value='';
-  const r=new FileReader(); r.onload=e=>shrinkImg(e.target.result,1200,src=>{chatAtt=src;renderChatAtt();const i=document.getElementById('chatInput');i.placeholder='Nachricht hinzufügen (optional) …';i.focus()}); r.readAsDataURL(f);
+  compressPhoto(f,(src,err)=>{if(err){toast(err);return}chatAtt=src;renderChatAtt();const i=document.getElementById('chatInput');i.placeholder='Nachricht hinzufügen (optional) …';i.focus()});
 }
 function renderChatAtt(){
   const el=document.getElementById('chatAtt'); if(!el)return;
@@ -1093,9 +1095,11 @@ function renderDamageForm(){
     <label class="f">Kostenvoranschlag vorab gewünscht? *</label>${chips(['Ja, bitte vorab','Nein, direkt reparieren'],dmg.quote===true?'Ja, bitte vorab':dmg.quote===false?'Nein, direkt reparieren':null,'quote')}
     <label class="f">Beschreibung</label>
     <textarea class="input" id="dText" oninput="dmg.text=this.value" placeholder="z. B. Linker Bügel hat sich gelockert, Brille rutscht.">${esc(dmg.text)}</textarea>
-    <label class="f">Fotos (optional)</label>
+    <label class="f">Fotos (optional) <span class="muted-s" id="photoCount" style="font-weight:400">${dmg.photos.length} von ${PHOTO.maxCount} Fotos</span></label>
     <label class="upload"><input type="file" accept="image/*" multiple hidden onchange="previewImgs(this)">📷 Fotos aufnehmen oder auswählen</label>
-    <div class="thumbs" id="thumbs">${dmg.photos.map(src=>`<img src="${src}">`).join('')}</div>
+    <p class="muted-s" style="margin-top:6px">Fotos werden automatisch verkleinert, Standortdaten werden entfernt.</p>
+    <p class="muted-s" id="photoMsg" role="status" hidden style="color:var(--danger);font-weight:600;margin-top:6px"></p>
+    <div class="thumbs" id="thumbs">${dmg.photos.map((src,i)=>`<span class="th"><img src="${src}" alt="Foto ${i+1}"><button type="button" aria-label="Foto ${i+1} entfernen" onclick="dmg.photos.splice(${i},1);renderThumbs()">×</button></span>`).join('')}</div>
     <label class="f">Wie möchten Sie vorgehen?</label>
     <div class="chips">${howOpts().map((h,i)=>`<button class="chip ${i===dmg.how?'on':''}" onclick="pickChip(this);dmg.how=${i}">${esc(h)}</button>`).join('')}</div>
     ${dmg.err?`<p class="muted-s" style="color:var(--danger);margin-top:14px;font-weight:600">${esc(dmg.err)}</p>`:''}
@@ -1103,10 +1107,43 @@ function renderDamageForm(){
     <button class="btn accent mt" style="margin-top:12px" onclick="damageSummary()">${dmg.kasko?'Kasko-Fall prüfen':'Meldung absenden'}</button>`);
   document.getElementById('sheetBody').scrollTop=sc;
 }
-function shrinkImg(src,max,cb){const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.72))};im.onerror=()=>cb(src);im.src=src}
-function previewImgs(inp){
-  [...inp.files].slice(0,4-dmg.photos.length).forEach(f=>{const r=new FileReader();r.onload=e=>shrinkImg(e.target.result,900,src=>{dmg.photos.push(src);document.getElementById('thumbs').innerHTML=dmg.photos.map(src=>`<img src="${src}">`).join('')});r.readAsDataURL(f)});
+/* Fotos vor dem Upload komprimieren: lange Kante max. 2.000 px (nie unter 1.200 px), JPEG ~80 %, Ziel 300–600 KB.
+   Neu zeichnen auf Canvas entfernt alle EXIF-Daten inkl. GPS. Später am Server: Vorschaubilder (~400 px). */
+const PHOTO={maxEdge:2000,minEdge:1200,q:.8,minQ:.6,target:600*1024,maxFile:15*1024*1024,maxCount:5};
+const dataBytes=u=>Math.round((u.length-u.indexOf(',')-1)*3/4);
+const fmtKB=b=>b>=1048576?(b/1048576).toFixed(1).replace('.',',')+' MB':Math.round(b/1024)+' KB';
+function compressPhoto(file,cb){
+  if(!file||!/^image\//.test(file.type||'image/')){cb(null,'Bitte nur Bilddateien auswählen.');return}
+  if(file.size>PHOTO.maxFile){cb(null,'„'+(file.name||'Foto')+'“ ist größer als 15 MB und wurde nicht übernommen.');return}
+  const url=(window.URL||window.webkitURL).createObjectURL(file), im=new Image();
+  im.onload=()=>{
+    const long=Math.max(im.width,im.height); let edge=Math.min(PHOTO.maxEdge,long), q=PHOTO.q, out;
+    const enc=()=>{const k=edge/long,c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q)};
+    out=enc();
+    while(dataBytes(out)>PHOTO.target&&q>PHOTO.minQ+.001){q-=.1;out=enc()}
+    while(dataBytes(out)>PHOTO.target&&edge>PHOTO.minEdge){edge=Math.max(PHOTO.minEdge,Math.round(edge*.85));out=enc()}
+    (window.URL||window.webkitURL).revokeObjectURL(url);
+    cb(out,null,{before:file.size,after:dataBytes(out),edge});
+  };
+  im.onerror=()=>{(window.URL||window.webkitURL).revokeObjectURL(url);cb(null,'Das Foto konnte nicht gelesen werden.')};
+  im.src=url;
 }
+function renderThumbs(){const t=document.getElementById('thumbs');if(t)t.innerHTML=dmg.photos.map((src,i)=>`<span class="th"><img src="${src}" alt="Foto ${i+1}"><button type="button" aria-label="Foto ${i+1} entfernen" onclick="dmg.photos.splice(${i},1);renderThumbs()">×</button></span>`).join('');
+  const n=document.getElementById('photoCount');if(n)n.textContent=dmg.photos.length+' von '+PHOTO.maxCount+' Fotos';}
+function photoMsg(t){const m=document.getElementById('photoMsg');if(m){m.textContent=t||'';m.hidden=!t}}
+function previewImgs(inp){
+  const files=[...inp.files]; inp.value=''; photoMsg('');
+  const free=PHOTO.maxCount-dmg.photos.length, msgs=[];
+  if(free<=0){photoMsg('Maximal '+PHOTO.maxCount+' Fotos pro Meldung.');return}
+  if(files.length>free)msgs.push('Maximal '+PHOTO.maxCount+' Fotos pro Meldung – '+(files.length-free)+' nicht übernommen.');
+  let open=Math.min(files.length,free); if(!open){photoMsg(msgs.join(' '));return}
+  files.slice(0,free).forEach(f=>compressPhoto(f,(src,err)=>{
+    if(src&&dmg.photos.length<PHOTO.maxCount)dmg.photos.push(src); if(err)msgs.push(err);
+    if(--open===0){renderThumbs();photoMsg(msgs.join(' '))}
+  }));
+}
+
 function damageSummary(){
   const g=findGlasses(dmg.gid);
   const miss=needsSide(dmg.type)&&!dmg.side?'Bitte wählen Sie die Seite (Rechts, Links oder Beides).':needsPart(dmg.type)&&!dmg.part?'Bitte wählen Sie den Bereich (Mittelteil, Bügel oder Beides).':(!dmg.viaKasko&&askKasko()&&dmg.kasko===null)?'Bitte geben Sie an, ob die Vollkasko greifen soll.':(dmg.quote===undefined||dmg.quote===null)?'Bitte wählen Sie, ob Sie vorab einen Kostenvoranschlag möchten.':'';
